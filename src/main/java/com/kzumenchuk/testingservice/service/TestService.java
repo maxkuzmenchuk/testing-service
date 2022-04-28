@@ -7,6 +7,7 @@ import com.kzumenchuk.testingservice.repository.model.TagEntity;
 import com.kzumenchuk.testingservice.repository.model.TestEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -48,4 +49,14 @@ public class TestService {
 
         return testRepository.save(testEntity);
     }
+
+    public TestEntity getTestByID(Long id) {
+        return testRepository.findById(id).orElse(new TestEntity());
+    }
+
+    public List<TestEntity> getAllTests() {
+        return testRepository.findAll();
+    }
+
+
 }
