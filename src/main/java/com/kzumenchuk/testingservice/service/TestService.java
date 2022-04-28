@@ -57,6 +57,4 @@ public class TestService {
     public List<TestEntity> getAllTests() {
         return testRepository.findAll();
     }
-
-
 }

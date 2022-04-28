@@ -57,3 +57,23 @@ create table test_tags
 
 create unique index test_tags_tag_id_uindex
     on test_tags (tag_id);
+
+create table test_results
+(
+    result_id                  serial
+        constraint test_results_pk
+            primary key,
+    user_id                    int       not null,
+    test_id                    int       not null
+        constraint test_results_tests_test_id_fk
+            references tests
+            on update cascade on delete cascade,
+    correct_answers_count      int       not null,
+    correct_answers_percentage int       not null,
+    testing_date               timestamp not null
+);
+
+create unique index test_results_result_id_uindex
+    on test_results (result_id);
+
+
