@@ -1,5 +1,6 @@
-package com.kzumenchuk.testingservice.model;
+package com.kzumenchuk.testingservice.repository.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.hibernate.Hibernate;
 
@@ -12,29 +13,27 @@ import java.util.Objects;
 @Setter
 @Builder
 @Entity
-@Table(name = "test_options")
-public class OptionEntity {
+@Table(name = "test_tags")
+public class TagEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "option_id")
-    private Long testID;
+    @Column(name = "tag_id")
+    private Long tagID;
 
-    @Column(name = "option_value")
+    @Column(name = "tag_value")
     private String value;
-
-    @Column(name = "is_correct")
-    private boolean isCorrect;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "test_id", nullable = false)
-    private TestEntity test;
+    @JsonIgnore
+    private TestEntity testEntity;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        OptionEntity that = (OptionEntity) o;
-        return testID != null && Objects.equals(testID, that.testID);
+        TagEntity tagEntity = (TagEntity) o;
+        return tagID != null && Objects.equals(tagID, tagEntity.tagID);
     }
 
     @Override
@@ -44,10 +43,10 @@ public class OptionEntity {
 
     @Override
     public String toString() {
-        return "OptionEntity{" +
-                "testID=" + testID +
+        return "TagEntity{" +
+                "tagID=" + tagID +
                 ", value='" + value + '\'' +
-                ", isCorrect=" + isCorrect +
+                ", testEntity=" + testEntity +
                 '}';
     }
 }

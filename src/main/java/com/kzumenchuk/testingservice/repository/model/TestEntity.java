@@ -1,4 +1,4 @@
-package com.kzumenchuk.testingservice.model;
+package com.kzumenchuk.testingservice.repository.model;
 
 import lombok.*;
 import org.hibernate.Hibernate;
@@ -29,10 +29,14 @@ public class TestEntity {
     @Column(name = "category")
     private String category;
 
-    @OneToMany(mappedBy = "test", fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY,
+            mappedBy = "test")
     private Set<OptionEntity> options;
 
-    @OneToMany(mappedBy = "testEntity", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "testEntity",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL)
     private Set<TagEntity> tags;
 
 
