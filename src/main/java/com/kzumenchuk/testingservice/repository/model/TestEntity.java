@@ -20,7 +20,7 @@ public class TestEntity {
     @Column(name = "test_id")
     private Long testID;
 
-    @Column(name = "title")
+    @Column(name = "test_title")
     private String title;
 
     @Column(name = "description")
@@ -32,7 +32,7 @@ public class TestEntity {
     @OneToMany(cascade = CascadeType.ALL,
             fetch = FetchType.LAZY,
             mappedBy = "test")
-    private Set<OptionEntity> options;
+    private Set<QuestionEntity> questions;
 
     @OneToMany(mappedBy = "testEntity",
             fetch = FetchType.LAZY,
@@ -47,7 +47,7 @@ public class TestEntity {
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
                 ", categories='" + category + '\'' +
-                ", variants=" + options +
+                ", questions=" + questions +
                 ", tags=" + tags +
                 '}';
     }

@@ -13,12 +13,12 @@ import java.util.Objects;
 @Setter
 @Builder
 @Entity
-@Table(name = "test_options")
+@Table(name = "question_options")
 public class OptionEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "option_id")
-    private Long testID;
+    private Long optionID;
 
     @Column(name = "option_value")
     private String value;
@@ -27,16 +27,16 @@ public class OptionEntity {
     private boolean isCorrect;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "test_id", nullable = false)
+    @JoinColumn(name = "question_id", nullable = false)
     @JsonIgnore
-    private TestEntity test;
+    private QuestionEntity question;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         OptionEntity that = (OptionEntity) o;
-        return testID != null && Objects.equals(testID, that.testID);
+        return optionID != null && Objects.equals(optionID, that.optionID);
     }
 
     @Override
@@ -47,7 +47,7 @@ public class OptionEntity {
     @Override
     public String toString() {
         return "OptionEntity{" +
-                "testID=" + testID +
+                "testID=" + optionID +
                 ", value='" + value + '\'' +
                 ", isCorrect=" + isCorrect +
                 '}';
