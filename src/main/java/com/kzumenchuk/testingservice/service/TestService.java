@@ -8,6 +8,7 @@ import com.kzumenchuk.testingservice.repository.model.TagEntity;
 import com.kzumenchuk.testingservice.repository.model.TestEntity;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,9 +19,13 @@ import java.util.Set;
 @Service
 public class TestService {
     private final TestRepository testRepository;
+    private final QuestionService questionService;
+    private final TagsService tagsService;
 
-    public TestService(TestRepository testRepository) {
+    public TestService(TestRepository testRepository, QuestionService questionService, TagsService tagsService) {
         this.testRepository = testRepository;
+        this.questionService = questionService;
+        this.tagsService = tagsService;
     }
 
     // TODO: ADD COMPARING TESTS BEFORE ADDING
@@ -40,16 +45,25 @@ public class TestService {
             Set<OptionEntity> options = q.getOptions();
             options.stream()
                     .filter(Objects::nonNull)
-                    .forEach((x) -> x.setQuestion(q));
+                    .forEach((x) -> {
+                        x.setUpdateDate(LocalDateTime.now());
+                        x.setQuestion(q);
+                    });
         }
 
         questions.stream()
                 .filter(Objects::nonNull)
-                .forEach((x) -> x.setTest(testEntity));
+                .forEach((x) -> {
+                    x.setUpdateDate(LocalDateTime.now());
+                    x.setTest(testEntity);
+                });
 
         tags.stream()
                 .filter(Objects::nonNull)
-                .forEach(x -> x.setTestEntity(testEntity));
+                .forEach(x -> {
+                    x.setUpdateDate(LocalDateTime.now());
+                    x.setTestEntity(testEntity);
+                });
 
         testEntity.setQuestions(questions);
         testEntity.setTags(tags);
@@ -58,37 +72,21 @@ public class TestService {
     }
 
     // TODO: ADD UPDATE HISTORY
+    // TODO: ADD UPDATING ONLY MODIFIED FIELDS
+    @Transactional(rollbackOn = Exception.class)
     public TestEntity editTest(TestEntity editedTestData) {
         Optional<TestEntity> databaseTestData = testRepository.findById(editedTestData.getTestID());
 
         if (databaseTestData.isPresent()) {
             TestEntity test = databaseTestData.get();
 
+            questionService.editQuestions(editedTestData.getQuestions());
+            tagsService.editTags(editedTestData.getTags());
+
             test.setTitle(editedTestData.getTitle());
             test.setDescription(editedTestData.getDescription());
             test.setCategory(editedTestData.getCategory());
             test.setUpdateDate(LocalDateTime.now());
-
-            Set<QuestionEntity> questions = test.getQuestions();
-            Set<TagEntity> tags = test.getTags();
-
-            for (QuestionEntity q : questions) {
-                Set<OptionEntity> options = q.getOptions();
-                options.stream()
-                        .filter(Objects::nonNull)
-                        .forEach((x) -> x.setQuestion(q));
-            }
-
-            questions.stream()
-                    .filter(Objects::nonNull)
-                    .forEach((x) -> x.setTest(test));
-
-            tags.stream()
-                    .filter(Objects::nonNull)
-                    .forEach(x -> x.setTestEntity(test));
-
-            test.setQuestions(questions);
-            test.setTags(tags);
 
             return testRepository.saveAndFlush(test);
         } else {

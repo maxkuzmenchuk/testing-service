@@ -3,7 +3,7 @@ create table tests
     test_id     serial
         constraint tests_pk
             primary key,
-    title       varchar   not null,
+    test_title  varchar   not null,
     description varchar,
     category    varchar   not null,
     create_date date      not null,
@@ -15,12 +15,13 @@ create unique index tests_test_id_uindex
 
 create table test_questions
 (
-    question_id serial
+    question_id    serial
         constraint test_questions_pk
             primary key,
-    title       varchar not null,
-    description varchar,
-    test_id     int
+    question_title varchar   not null,
+    description    varchar,
+    update_date    timestamp not null,
+    test_id        int
         constraint test_questions_tests_test_id_fk
             references tests
             on update cascade on delete cascade
@@ -34,8 +35,9 @@ create table question_options
     option_id    serial
         constraint question_options_pk
             primary key,
-    option_value varchar not null,
-    is_correct   boolean not null,
+    option_value varchar   not null,
+    is_correct   boolean   not null,
+    update_date  timestamp not null,
     question_id  int
         constraint question_options_test_questions_question_id_fk
             references test_questions
@@ -47,11 +49,12 @@ create unique index question_options_option_id_uindex
 
 create table test_tags
 (
-    tag_id    serial  not null
+    tag_id      serial    not null
         constraint test_tags_pk
             primary key,
-    tag_value varchar not null,
-    test_id   int     not null
+    tag_value   varchar   not null,
+    update_date timestamp not null,
+    test_id     int       not null
         constraint test_tags_tests_test_id_fk
             references tests
             on update cascade on delete cascade

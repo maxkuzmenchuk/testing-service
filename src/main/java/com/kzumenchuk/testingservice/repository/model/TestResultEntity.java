@@ -47,16 +47,4 @@ public class TestResultEntity {
     public int hashCode() {
         return getClass().hashCode();
     }
-
-    @Override
-    public String toString() {
-        return "TestResultEntity{" +
-                "resultID=" + resultID +
-                ", userID=" + userID +
-                ", testID=" + testID +
-                ", correctAnswersCount=" + correctAnswersCount +
-                ", correctAnswersPercentage=" + correctAnswersPercentage +
-                ", testingDate=" + testingDate +
-                '}';
-    }
 }

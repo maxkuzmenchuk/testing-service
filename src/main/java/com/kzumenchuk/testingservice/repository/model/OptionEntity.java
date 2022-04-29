@@ -3,8 +3,10 @@ package com.kzumenchuk.testingservice.repository.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @AllArgsConstructor
@@ -13,6 +15,7 @@ import java.util.Objects;
 @Setter
 @Builder
 @Entity
+@DynamicUpdate
 @Table(name = "question_options")
 public class OptionEntity {
     @Id
@@ -25,6 +28,9 @@ public class OptionEntity {
 
     @Column(name = "is_correct")
     private boolean isCorrect;
+
+    @Column(name = "update_date")
+    private LocalDateTime updateDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id", nullable = false)
@@ -42,14 +48,5 @@ public class OptionEntity {
     @Override
     public int hashCode() {
         return getClass().hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return "OptionEntity{" +
-                "testID=" + optionID +
-                ", value='" + value + '\'' +
-                ", isCorrect=" + isCorrect +
-                '}';
     }
 }

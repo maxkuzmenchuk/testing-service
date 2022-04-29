@@ -3,8 +3,10 @@ package com.kzumenchuk.testingservice.repository.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
 
@@ -14,6 +16,7 @@ import java.util.Set;
 @Setter
 @Builder
 @Entity
+@DynamicUpdate
 @Table(name = "test_questions")
 public class QuestionEntity {
     @Id
@@ -26,6 +29,9 @@ public class QuestionEntity {
 
     @Column(name = "description")
     private String description;
+
+    @Column(name = "update_date")
+    private LocalDateTime updateDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "test_id", nullable = false)
@@ -48,16 +54,5 @@ public class QuestionEntity {
     @Override
     public int hashCode() {
         return getClass().hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return "QuestionEntity{" +
-                "questionID=" + questionID +
-                ", title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", test=" + test +
-                ", options=" + options +
-                '}';
     }
 }
