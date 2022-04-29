@@ -59,4 +59,16 @@ public class TestService {
     public List<TestEntity> getAllTests() {
         return testRepository.findAll();
     }
+
+    public List<TestEntity> getTestsByTitle(String title) {
+        return testRepository.getTestEntitiesByTitle(title);
+    }
+
+    public List<TestEntity> getTestsByCategory(String category) {
+        return testRepository.getTestEntitiesByCategory(category);
+    }
+
+    public List<TestEntity> getTestsByCreateDate(LocalDate date) {
+        return testRepository.getTestEntitiesByCreateDate(date);
+    }
 }
