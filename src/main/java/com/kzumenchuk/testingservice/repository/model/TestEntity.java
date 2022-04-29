@@ -4,6 +4,7 @@ import lombok.*;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Set;
 
@@ -28,6 +29,9 @@ public class TestEntity {
 
     @Column(name = "category")
     private String category;
+
+    @Column(name = "create_date")
+    private LocalDate createDate;
 
     @OneToMany(cascade = CascadeType.ALL,
             fetch = FetchType.LAZY,

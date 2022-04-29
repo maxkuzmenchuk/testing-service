@@ -7,6 +7,7 @@ import com.kzumenchuk.testingservice.repository.model.TagEntity;
 import com.kzumenchuk.testingservice.repository.model.TestEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -24,6 +25,7 @@ public class TestService {
                 .title(test.getTitle())
                 .description(test.getDescription())
                 .category(test.getCategory())
+                .createDate(LocalDate.now())
                 .build();
 
         Set<QuestionEntity> questions = test.getQuestions();
