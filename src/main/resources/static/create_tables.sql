@@ -3,10 +3,11 @@ create table tests
     test_id     serial
         constraint tests_pk
             primary key,
-    title       varchar not null,
+    title       varchar   not null,
     description varchar,
-    category    varchar not null,
-    create_date date    not null
+    category    varchar   not null,
+    create_date date      not null,
+    update_date timestamp not null
 );
 
 create unique index tests_test_id_uindex

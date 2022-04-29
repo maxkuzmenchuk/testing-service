@@ -21,6 +21,11 @@ public class TestController {
         return testService.addNewTest(test);
     }
 
+    @PostMapping("/edit")
+    public TestEntity editTest(@RequestBody TestEntity test) {
+        return testService.editTest(test);
+    }
+
     @GetMapping("/get-all")
     public List<TestEntity> getAllTests() {
         return testService.getAllTests();

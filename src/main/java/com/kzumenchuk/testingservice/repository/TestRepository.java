@@ -10,9 +10,7 @@ import java.util.List;
 @Repository
 public interface TestRepository extends JpaRepository<TestEntity, Long> {
     List<TestEntity> getTestEntitiesByCategory(String category);
-
     List<TestEntity> getTestEntitiesByTitle(String title);
-
     List<TestEntity> getTestEntitiesByCreateDate(LocalDate date);
 
 }

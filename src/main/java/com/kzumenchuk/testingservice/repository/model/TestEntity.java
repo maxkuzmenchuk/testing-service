@@ -5,6 +5,7 @@ import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
 
@@ -33,6 +34,9 @@ public class TestEntity {
     @Column(name = "create_date")
     private LocalDate createDate;
 
+    @Column(name = "update_date")
+    private LocalDateTime updateDate;
+
     @OneToMany(cascade = CascadeType.ALL,
             fetch = FetchType.LAZY,
             mappedBy = "test")
@@ -50,7 +54,9 @@ public class TestEntity {
                 "testID=" + testID +
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
-                ", categories='" + category + '\'' +
+                ", category='" + category + '\'' +
+                ", createDate=" + createDate +
+                ", updateDate=" + updateDate +
                 ", questions=" + questions +
                 ", tags=" + tags +
                 '}';
