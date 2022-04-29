@@ -5,7 +5,8 @@ create table tests
             primary key,
     title       varchar not null,
     description varchar,
-    category    varchar not null
+    category    varchar not null,
+    create_date date    not null
 );
 
 create unique index tests_test_id_uindex
