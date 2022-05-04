@@ -3,6 +3,8 @@ package com.kzumenchuk.testingservice.controller;
 import com.kzumenchuk.testingservice.repository.model.TestEntity;
 import com.kzumenchuk.testingservice.service.TestService;
 import com.kzumenchuk.testingservice.util.CustomResponse;
+import com.kzumenchuk.testingservice.util.requests.DeleteTestRequest;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -52,6 +54,32 @@ public class TestController {
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(successResponseBody);
+        } catch (Exception exception) {
+            errorResponseBody.clear();
+            errorResponseBody = CustomResponse.createErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(), exception.getMessage());
+
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(errorResponseBody);
+        }
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<Map<String, Object>> deleteTest(@RequestBody DeleteTestRequest deleteTestRequest) {
+        try {
+            testService.deleteTestById(deleteTestRequest.getDeleteIDs());
+            successResponseBody.clear();
+            successResponseBody = CustomResponse.createSuccessResponse("Tests deleted successfully", "");
+
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(successResponseBody);
+        } catch (DataAccessException e) {
+            errorResponseBody.clear();
+            errorResponseBody = CustomResponse.createErrorResponse(HttpStatus.FORBIDDEN.getReasonPhrase(), e.getMessage());
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(errorResponseBody);
         } catch (Exception exception) {
             errorResponseBody.clear();
             errorResponseBody = CustomResponse.createErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(), exception.getMessage());

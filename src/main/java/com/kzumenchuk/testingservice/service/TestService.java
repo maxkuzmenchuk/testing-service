@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 @Service
 public class TestService {
@@ -95,6 +96,13 @@ public class TestService {
         } else {
             throw new TestNotFoundException("Test not found");
         }
+    }
+
+    @Transactional(rollbackOn = Exception.class)
+    public void deleteTestById(Long[] IDs) {
+        Stream.of(IDs)
+                .filter(Objects::nonNull)
+                .forEach(testRepository::deleteById);
     }
 
     public TestEntity getTestByID(Long id) {
