@@ -73,7 +73,7 @@ public class TestService {
 
     // TODO: ADD UPDATE HISTORY
     @Transactional(rollbackOn = Exception.class)
-    public void editTest(TestEntity editedTestData) {
+    public TestEntity editTest(TestEntity editedTestData) {
         Optional<TestEntity> databaseTestData = testRepository.findById(editedTestData.getTestID());
 
         if (databaseTestData.isPresent()) {
@@ -88,7 +88,9 @@ public class TestService {
                 test.setCategory(editedTestData.getCategory());
                 test.setUpdateDate(LocalDateTime.now());
 
-                testRepository.saveAndFlush(test);
+                return testRepository.saveAndFlush(test);
+            } else {
+                return testRepository.getById(editedTestData.getTestID());
             }
         } else {
             throw new TestNotFoundException("Test not found");
