@@ -46,8 +46,7 @@ public class QuestionEntity {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         QuestionEntity that = (QuestionEntity) o;
-        return questionID != null && Objects.equals(questionID, that.questionID)
-                && Objects.equals(title, that.title) && Objects.equals(description, that.description);
+        return Objects.equals(title, that.title) && Objects.equals(description, that.description);
     }
 
     @Override

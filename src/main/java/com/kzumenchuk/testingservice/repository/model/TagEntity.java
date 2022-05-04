@@ -37,7 +37,7 @@ public class TagEntity {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         TagEntity tagEntity = (TagEntity) o;
-        return tagID != null && Objects.equals(tagID, tagEntity.tagID) && Objects.equals(value, tagEntity.value);
+        return Objects.equals(value, tagEntity.value);
     }
 
     @Override

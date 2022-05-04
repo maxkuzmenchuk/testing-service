@@ -40,7 +40,7 @@ public class OptionEntity {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         OptionEntity that = (OptionEntity) o;
-        return optionID != null && Objects.equals(optionID, that.optionID) && Objects.equals(value, that.value)
+        return Objects.equals(value, that.value)
                 && Objects.equals(isCorrect, that.isCorrect);
     }
 

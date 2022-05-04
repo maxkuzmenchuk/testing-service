@@ -52,7 +52,7 @@ public class TestEntity {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         TestEntity that = (TestEntity) o;
-        return testID != null && Objects.equals(testID, that.testID) && Objects.equals(title, that.title)
+        return Objects.equals(title, that.title)
                 && Objects.equals(description, that.description) && Objects.equals(category, that.category);
     }
 

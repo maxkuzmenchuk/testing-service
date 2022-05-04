@@ -1,5 +1,6 @@
 package com.kzumenchuk.testingservice.service;
 
+import com.kzumenchuk.testingservice.exception.TestAlreadyExistsException;
 import com.kzumenchuk.testingservice.exception.TestNotFoundException;
 import com.kzumenchuk.testingservice.repository.TestRepository;
 import com.kzumenchuk.testingservice.repository.model.OptionEntity;
@@ -29,47 +30,60 @@ public class TestService {
         this.tagsService = tagsService;
     }
 
-    // TODO: ADD COMPARING TESTS BEFORE ADDING
     public TestEntity addNewTest(TestEntity test) {
-        TestEntity testEntity = TestEntity.builder()
-                .title(test.getTitle())
-                .description(test.getDescription())
-                .category(test.getCategory())
-                .createDate(LocalDate.now())
-                .updateDate(LocalDateTime.now())
-                .build();
+        boolean isExists = false;
+        List<TestEntity> testEntityList = testRepository.getTestEntitiesByTitle(test.getTitle());
 
-        Set<QuestionEntity> questions = test.getQuestions();
-        Set<TagEntity> tags = test.getTags();
+        for (TestEntity testData : testEntityList) {
+            if (testData.equals(test) || testData.getQuestions().equals(test.getQuestions())) {
+                isExists = true;
+                break;
+            }
+        }
 
-        for (QuestionEntity q : questions) {
-            Set<OptionEntity> options = q.getOptions();
-            options.stream()
+        if (!isExists) {
+            TestEntity testEntity = TestEntity.builder()
+                    .title(test.getTitle())
+                    .description(test.getDescription())
+                    .category(test.getCategory())
+                    .createDate(LocalDate.now())
+                    .updateDate(LocalDateTime.now())
+                    .build();
+
+            Set<QuestionEntity> questions = test.getQuestions();
+            Set<TagEntity> tags = test.getTags();
+
+            for (QuestionEntity q : questions) {
+                Set<OptionEntity> options = q.getOptions();
+                options.stream()
+                        .filter(Objects::nonNull)
+                        .forEach((x) -> {
+                            x.setUpdateDate(LocalDateTime.now());
+                            x.setQuestion(q);
+                        });
+            }
+
+            questions.stream()
                     .filter(Objects::nonNull)
                     .forEach((x) -> {
                         x.setUpdateDate(LocalDateTime.now());
-                        x.setQuestion(q);
+                        x.setTest(testEntity);
                     });
+
+            tags.stream()
+                    .filter(Objects::nonNull)
+                    .forEach(x -> {
+                        x.setUpdateDate(LocalDateTime.now());
+                        x.setTestEntity(testEntity);
+                    });
+
+            testEntity.setQuestions(questions);
+            testEntity.setTags(tags);
+
+            return testRepository.save(testEntity);
+        } else {
+            throw new TestAlreadyExistsException("Test is already exists");
         }
-
-        questions.stream()
-                .filter(Objects::nonNull)
-                .forEach((x) -> {
-                    x.setUpdateDate(LocalDateTime.now());
-                    x.setTest(testEntity);
-                });
-
-        tags.stream()
-                .filter(Objects::nonNull)
-                .forEach(x -> {
-                    x.setUpdateDate(LocalDateTime.now());
-                    x.setTestEntity(testEntity);
-                });
-
-        testEntity.setQuestions(questions);
-        testEntity.setTags(tags);
-
-        return testRepository.save(testEntity);
     }
 
     // TODO: ADD UPDATE HISTORY
