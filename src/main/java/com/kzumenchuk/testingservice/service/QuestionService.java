@@ -30,11 +30,13 @@ public class QuestionService {
 
                         optionsService.updateOptions(question);
 
-                        questionEntity.setTitle(question.getTitle());
-                        questionEntity.setDescription(question.getDescription());
-                        questionEntity.setUpdateDate(LocalDateTime.now());
+                        if (!question.equals(questionEntity)) {
+                            questionEntity.setTitle(question.getTitle());
+                            questionEntity.setDescription(question.getDescription());
+                            questionEntity.setUpdateDate(LocalDateTime.now());
 
-                        questionRepository.save(questionEntity);
+                            questionRepository.save(questionEntity);
+                        }
                     }
                 });
     }

@@ -3,7 +3,6 @@ package com.kzumenchuk.testingservice.repository.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.hibernate.Hibernate;
-import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -15,7 +14,6 @@ import java.util.Objects;
 @Setter
 @Builder
 @Entity
-@DynamicUpdate
 @Table(name = "test_tags")
 public class TagEntity {
     @Id
@@ -39,7 +37,7 @@ public class TagEntity {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         TagEntity tagEntity = (TagEntity) o;
-        return tagID != null && Objects.equals(tagID, tagEntity.tagID);
+        return tagID != null && Objects.equals(tagID, tagEntity.tagID) && Objects.equals(value, tagEntity.value);
     }
 
     @Override

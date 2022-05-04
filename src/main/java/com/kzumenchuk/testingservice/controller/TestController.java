@@ -22,8 +22,9 @@ public class TestController {
     }
 
     @PostMapping("/edit")
-    public TestEntity editTest(@RequestBody TestEntity test) {
-        return testService.editTest(test);
+    public String editTest(@RequestBody TestEntity test) {
+        testService.editTest(test);
+        return "Updated";
     }
 
     @GetMapping("/get-all")

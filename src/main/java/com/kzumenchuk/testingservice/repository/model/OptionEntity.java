@@ -3,7 +3,6 @@ package com.kzumenchuk.testingservice.repository.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.hibernate.Hibernate;
-import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -15,7 +14,6 @@ import java.util.Objects;
 @Setter
 @Builder
 @Entity
-@DynamicUpdate
 @Table(name = "question_options")
 public class OptionEntity {
     @Id
@@ -42,7 +40,8 @@ public class OptionEntity {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         OptionEntity that = (OptionEntity) o;
-        return optionID != null && Objects.equals(optionID, that.optionID);
+        return optionID != null && Objects.equals(optionID, that.optionID) && Objects.equals(value, that.value)
+                && Objects.equals(isCorrect, that.isCorrect);
     }
 
     @Override

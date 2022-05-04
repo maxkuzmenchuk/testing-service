@@ -1,11 +1,12 @@
 package com.kzumenchuk.testingservice.repository.model;
 
 import lombok.*;
-import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Set;
 
 @AllArgsConstructor
@@ -14,7 +15,6 @@ import java.util.Set;
 @Setter
 @Builder
 @Entity
-@DynamicUpdate
 @Table(name = "tests")
 public class TestEntity {
     @Id
@@ -47,4 +47,17 @@ public class TestEntity {
             cascade = CascadeType.ALL)
     private Set<TagEntity> tags;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        TestEntity that = (TestEntity) o;
+        return testID != null && Objects.equals(testID, that.testID) && Objects.equals(title, that.title)
+                && Objects.equals(description, that.description) && Objects.equals(category, that.category);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

@@ -72,9 +72,8 @@ public class TestService {
     }
 
     // TODO: ADD UPDATE HISTORY
-    // TODO: ADD UPDATING ONLY MODIFIED FIELDS
     @Transactional(rollbackOn = Exception.class)
-    public TestEntity editTest(TestEntity editedTestData) {
+    public void editTest(TestEntity editedTestData) {
         Optional<TestEntity> databaseTestData = testRepository.findById(editedTestData.getTestID());
 
         if (databaseTestData.isPresent()) {
@@ -83,12 +82,14 @@ public class TestService {
             questionService.editQuestions(editedTestData.getQuestions());
             tagsService.editTags(editedTestData.getTags());
 
-            test.setTitle(editedTestData.getTitle());
-            test.setDescription(editedTestData.getDescription());
-            test.setCategory(editedTestData.getCategory());
-            test.setUpdateDate(LocalDateTime.now());
+            if (!test.equals(editedTestData)) {
+                test.setTitle(editedTestData.getTitle());
+                test.setDescription(editedTestData.getDescription());
+                test.setCategory(editedTestData.getCategory());
+                test.setUpdateDate(LocalDateTime.now());
 
-            return testRepository.saveAndFlush(test);
+                testRepository.saveAndFlush(test);
+            }
         } else {
             throw new TestNotFoundException("Test not found");
         }

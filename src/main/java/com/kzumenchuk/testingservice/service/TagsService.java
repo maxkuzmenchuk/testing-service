@@ -30,15 +30,12 @@ public class TagsService {
                     if (databaseTagData.isPresent()) {
                         TagEntity tag = databaseTagData.get();
 
+                        if (!tag.equals(editedTag)) {
+                            tag.setValue(editedTag.getValue());
+                            tag.setUpdateDate(LocalDateTime.now());
 
-                        // TODO: CHECR STACKOOVERFLOW LINK FOR DYNAMIC UPDATE ENTITIES
-                        // TODO: https://stackoverflow.com/questions/52162452/how-to-use-hibernate-dynamicupdate-with-spring-data-jpa
-                        // TODO: TRY TO WRITE QUERY LIKE " ... SET :param1 = :param2 WHERE ..."
-
-                        tag.setValue(editedTag.getValue());
-                        tag.setUpdateDate(LocalDateTime.now());
-
-                        tagsRepository.save(tag);
+                            tagsRepository.save(tag);
+                        }
                     } // TODO: ADD ELSE BLOCK
                 });
     }

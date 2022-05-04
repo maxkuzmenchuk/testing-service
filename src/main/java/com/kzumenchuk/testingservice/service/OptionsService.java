@@ -27,17 +27,19 @@ public class OptionsService {
 
         editedOptions.stream()
                 .filter(Objects::nonNull)
-                .forEach((entity) -> {
-                    Optional<OptionEntity> databaseOptionData = optionsRepository.findById(entity.getOptionID());
+                .forEach((editedOption) -> {
+                    Optional<OptionEntity> databaseOptionData = optionsRepository.findById(editedOption.getOptionID());
 
                     if (databaseOptionData.isPresent()) {
                         OptionEntity optionEntity = databaseOptionData.get();
 
-                        optionEntity.setValue(entity.getValue());
-                        optionEntity.setCorrect(entity.isCorrect());
-                        optionEntity.setUpdateDate(LocalDateTime.now());
+                        if (!editedOption.equals(optionEntity)) {
+                            optionEntity.setValue(editedOption.getValue());
+                            optionEntity.setCorrect(editedOption.isCorrect());
+                            optionEntity.setUpdateDate(LocalDateTime.now());
 
-                        optionsRepository.save(optionEntity);
+                            optionsRepository.save(optionEntity);
+                        }
                     } // TODO: ADD ELSE BLOCK
                 });
     }
