@@ -81,4 +81,22 @@ create table test_results
 create unique index test_results_result_id_uindex
     on test_results (result_id);
 
+create table update_log
+(
+    update_log_id  serial
+        constraint update_log_pk
+            primary key,
+    entity_id      int        not null,
+    entity_type    varchar(9) not null,
+    operation_type char(1)    not null,
+    updated_field  varchar    not null,
+    old_value      varchar    not null,
+    new_value      varchar    not null,
+    update_date    timestamp  not null,
+    update_user_id int        not null
+);
+
+create unique index update_log_update_log_id_uindex
+    on update_log (update_log_id);
+
 

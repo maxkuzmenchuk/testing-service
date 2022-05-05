@@ -3,10 +3,9 @@ package com.kzumenchuk.testingservice.service;
 import com.kzumenchuk.testingservice.exception.TestAlreadyExistsException;
 import com.kzumenchuk.testingservice.exception.TestNotFoundException;
 import com.kzumenchuk.testingservice.repository.TestRepository;
-import com.kzumenchuk.testingservice.repository.model.OptionEntity;
-import com.kzumenchuk.testingservice.repository.model.QuestionEntity;
-import com.kzumenchuk.testingservice.repository.model.TagEntity;
-import com.kzumenchuk.testingservice.repository.model.TestEntity;
+import com.kzumenchuk.testingservice.repository.model.*;
+import com.kzumenchuk.testingservice.util.EntityType;
+import com.kzumenchuk.testingservice.util.UpdateLogUtil;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -24,12 +23,16 @@ public class TestService {
     private final QuestionService questionService;
     private final TagsService tagsService;
 
-    public TestService(TestRepository testRepository, QuestionService questionService, TagsService tagsService) {
+    private final UpdateLogService updateLogService;
+
+    public TestService(TestRepository testRepository, QuestionService questionService, TagsService tagsService, UpdateLogService updateLogService) {
         this.testRepository = testRepository;
         this.questionService = questionService;
         this.tagsService = tagsService;
+        this.updateLogService = updateLogService;
     }
 
+    @Transactional(rollbackOn = Exception.class)
     public TestEntity addNewTest(TestEntity test) {
         boolean isExists = false;
         List<TestEntity> testEntityList = testRepository.getTestEntitiesByTitle(test.getTitle());
@@ -80,13 +83,18 @@ public class TestService {
             testEntity.setQuestions(questions);
             testEntity.setTags(tags);
 
-            return testRepository.save(testEntity);
+            TestEntity savedTest = testRepository.saveAndFlush(testEntity);
+
+            UpdateLogEntity insertTestLog = UpdateLogUtil.createLogEntity(savedTest.getTestID(), EntityType.TEST,
+                    "I", "", "", "", 1L);
+            updateLogService.saveLog(insertTestLog);
+
+            return savedTest;
         } else {
             throw new TestAlreadyExistsException("Test is already exists");
         }
     }
 
-    // TODO: ADD UPDATE HISTORY
     @Transactional(rollbackOn = Exception.class)
     public TestEntity editTest(TestEntity editedTestData) {
         Optional<TestEntity> databaseTestData = testRepository.findById(editedTestData.getTestID());
@@ -94,10 +102,12 @@ public class TestService {
         if (databaseTestData.isPresent()) {
             TestEntity test = databaseTestData.get();
 
-            questionService.editQuestions(editedTestData.getQuestions());
-            tagsService.editTags(editedTestData.getTags());
+            questionService.editQuestions(editedTestData.getQuestions(), 1L);
+            tagsService.editTags(editedTestData.getTags(), 1L);
 
             if (!test.equals(editedTestData)) {
+                logUpdate(test, editedTestData, 1L);
+
                 test.setTitle(editedTestData.getTitle());
                 test.setDescription(editedTestData.getDescription());
                 test.setCategory(editedTestData.getCategory());
@@ -116,7 +126,13 @@ public class TestService {
     public void deleteTestById(Long[] IDs) {
         Stream.of(IDs)
                 .filter(Objects::nonNull)
-                .forEach(testRepository::deleteById);
+                .forEach((id) -> {
+                    testRepository.deleteById(id);
+
+                    UpdateLogEntity deletedTestLog = UpdateLogUtil.createLogEntity(id, EntityType.TEST,
+                            "D", "", "", "", 1L);
+                    updateLogService.saveLog(deletedTestLog);
+                });
     }
 
     public TestEntity getTestByID(Long id) {
@@ -137,5 +153,27 @@ public class TestService {
 
     public List<TestEntity> getTestsByCreateDate(LocalDate date) {
         return testRepository.getTestEntitiesByCreateDate(date);
+    }
+
+    public void logUpdate(TestEntity oldTest, TestEntity newTest, Long updateUserID) {
+        UpdateLogEntity testLog;
+
+        if (!oldTest.getTitle().equalsIgnoreCase(newTest.getTitle())) {
+            testLog = UpdateLogUtil.createLogEntity(oldTest.getTestID(), EntityType.TEST,
+                    "U", "title", oldTest.getTitle(), newTest.getTitle(), updateUserID);
+            updateLogService.saveLog(testLog);
+        }
+
+        if (!oldTest.getDescription().equalsIgnoreCase(newTest.getDescription())) {
+            testLog = UpdateLogUtil.createLogEntity(oldTest.getTestID(), EntityType.TEST,
+                    "U", "description", oldTest.getDescription(), newTest.getDescription(), updateUserID);
+            updateLogService.saveLog(testLog);
+        }
+
+        if (!oldTest.getCategory().equalsIgnoreCase(newTest.getCategory())) {
+            testLog = UpdateLogUtil.createLogEntity(oldTest.getTestID(), EntityType.TEST,
+                    "U", "category", oldTest.getCategory(), newTest.getCategory(), updateUserID);
+            updateLogService.saveLog(testLog);
+        }
     }
 }
