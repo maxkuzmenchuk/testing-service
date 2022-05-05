@@ -1,5 +1,6 @@
 package com.kzumenchuk.testingservice.service;
 
+import com.kzumenchuk.testingservice.exception.TagNotFoundException;
 import com.kzumenchuk.testingservice.repository.TagsRepository;
 import com.kzumenchuk.testingservice.repository.model.TagEntity;
 import com.kzumenchuk.testingservice.repository.model.UpdateLogEntity;
@@ -45,7 +46,9 @@ public class TagsService {
 
                             tagsRepository.save(tag);
                         }
-                    } // TODO: ADD ELSE BLOCK
+                    } else {
+                        throw new TagNotFoundException("Tag (id = " + editedTag.getTagID() + ") not found");
+                    }
                 });
     }
 }

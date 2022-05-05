@@ -1,5 +1,6 @@
 package com.kzumenchuk.testingservice.service;
 
+import com.kzumenchuk.testingservice.exception.OptionNotFoundException;
 import com.kzumenchuk.testingservice.repository.OptionsRepository;
 import com.kzumenchuk.testingservice.repository.model.OptionEntity;
 import com.kzumenchuk.testingservice.repository.model.QuestionEntity;
@@ -49,7 +50,9 @@ public class OptionsService {
 
                             optionsRepository.save(optionEntity);
                         }
-                    } // TODO: ADD ELSE BLOCK
+                    } else {
+                        throw new OptionNotFoundException("Option (id = " + editedOption.getOptionID() + ") not found");
+                    }
                 });
     }
 

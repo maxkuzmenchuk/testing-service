@@ -1,5 +1,6 @@
 package com.kzumenchuk.testingservice.service;
 
+import com.kzumenchuk.testingservice.exception.QuestionNotFoundException;
 import com.kzumenchuk.testingservice.repository.QuestionRepository;
 import com.kzumenchuk.testingservice.repository.model.QuestionEntity;
 import com.kzumenchuk.testingservice.repository.model.UpdateLogEntity;
@@ -44,6 +45,8 @@ public class QuestionService {
 
                             questionRepository.save(questionEntity);
                         }
+                    } else {
+                        throw new QuestionNotFoundException("Question (id = " + question.getQuestionID() + ") not found");
                     }
                 });
     }
