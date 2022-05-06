@@ -37,6 +37,9 @@ public class TestEntity {
     @Column(name = "update_date")
     private LocalDateTime updateDate;
 
+    @Column(name = "create_user_id")
+    private Long createUserID;
+
     @OneToMany(cascade = CascadeType.ALL,
             fetch = FetchType.LAZY,
             mappedBy = "test")

@@ -4,6 +4,8 @@ import com.kzumenchuk.testingservice.exception.TestAlreadyExistsException;
 import com.kzumenchuk.testingservice.exception.TestNotFoundException;
 import com.kzumenchuk.testingservice.repository.TestRepository;
 import com.kzumenchuk.testingservice.repository.model.*;
+import com.kzumenchuk.testingservice.repository.model.dto.TestDTO;
+import com.kzumenchuk.testingservice.util.EntityMapper;
 import com.kzumenchuk.testingservice.util.EntityType;
 import com.kzumenchuk.testingservice.util.UpdateLogUtil;
 import org.springframework.stereotype.Service;
@@ -11,10 +13,8 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -33,12 +33,13 @@ public class TestService {
     }
 
     @Transactional(rollbackOn = Exception.class)
-    public TestEntity addNewTest(TestEntity test) {
+    public TestDTO addNewTest(TestDTO testDTO) {
         boolean isExists = false;
-        List<TestEntity> testEntityList = testRepository.getTestEntitiesByTitle(test.getTitle());
+        List<TestEntity> testEntityList = testRepository.getTestEntitiesByTitle(testDTO.getTitle());
+
 
         for (TestEntity testData : testEntityList) {
-            if (testData.equals(test) || testData.getQuestions().equals(test.getQuestions())) {
+            if (testData.equals(EntityMapper.fromDTOToEntity(testDTO)) || testData.getQuestions().equals(testDTO.getQuestions())) {
                 isExists = true;
                 break;
             }
@@ -46,15 +47,16 @@ public class TestService {
 
         if (!isExists) {
             TestEntity testEntity = TestEntity.builder()
-                    .title(test.getTitle())
-                    .description(test.getDescription())
-                    .category(test.getCategory())
+                    .title(testDTO.getTitle())
+                    .description(testDTO.getDescription())
+                    .category(testDTO.getCategory())
                     .createDate(LocalDate.now())
+                    .createUserID(testDTO.getCreateUserID())
                     .updateDate(LocalDateTime.now())
                     .build();
 
-            Set<QuestionEntity> questions = test.getQuestions();
-            Set<TagEntity> tags = test.getTags();
+            Set<QuestionEntity> questions = testDTO.getQuestions();
+            Set<TagEntity> tags = testDTO.getTags();
 
             for (QuestionEntity q : questions) {
                 Set<OptionEntity> options = q.getOptions();
@@ -89,15 +91,16 @@ public class TestService {
                     "I", "", "", "", 1L);
             updateLogService.saveLog(insertTestLog);
 
-            return savedTest;
+            return EntityMapper.fromEntityToDTO(savedTest);
         } else {
             throw new TestAlreadyExistsException("Test is already exists");
         }
     }
 
     @Transactional(rollbackOn = Exception.class)
-    public TestEntity editTest(TestEntity editedTestData) {
+    public Map<String, Object> editTest(TestDTO editedTestData) {
         Optional<TestEntity> databaseTestData = testRepository.findById(editedTestData.getTestID());
+        Map<String, Object> hmResult = new HashMap<>();
 
         if (databaseTestData.isPresent()) {
             TestEntity test = databaseTestData.get();
@@ -105,7 +108,7 @@ public class TestService {
             questionService.editQuestions(editedTestData.getQuestions(), 1L);
             tagsService.editTags(editedTestData.getTags(), 1L);
 
-            if (!test.equals(editedTestData)) {
+            if (!test.equals(EntityMapper.fromDTOToEntity(editedTestData))) {
                 logUpdate(test, editedTestData, 1L);
 
                 test.setTitle(editedTestData.getTitle());
@@ -113,9 +116,16 @@ public class TestService {
                 test.setCategory(editedTestData.getCategory());
                 test.setUpdateDate(LocalDateTime.now());
 
-                return testRepository.saveAndFlush(test);
+                TestEntity updatedTest = testRepository.saveAndFlush(test);
+                hmResult.put("message", "Test updated successfully");
+                hmResult.put("result", EntityMapper.fromEntityToDTO(updatedTest));
+
+                return hmResult;
             } else {
-                return testRepository.getById(editedTestData.getTestID());
+                hmResult.put("message", "No updates needed");
+                hmResult.put("result", editedTestData);
+
+                return hmResult;
             }
         } else {
             throw new TestNotFoundException("Test not found");
@@ -135,27 +145,51 @@ public class TestService {
                 });
     }
 
-    public TestEntity getTestByID(Long id) {
-        return testRepository.findById(id).orElse(new TestEntity());
+    public TestDTO getTestByID(Long id) {
+        Optional<TestEntity> testEntityOptional = testRepository.findById(id);
+
+        if (testEntityOptional.isPresent()) {
+            TestEntity testEntity = testEntityOptional.get();
+
+            return EntityMapper.fromEntityToDTO(testEntity);
+        } else {
+            throw new TestNotFoundException("Test not found");
+        }
     }
 
-    public List<TestEntity> getAllTests() {
-        return testRepository.findAll();
+    public List<TestDTO> getAllTests() {
+        List<TestEntity> testEntityList = testRepository.findAll();
+
+        return testEntityList.stream()
+                .map(EntityMapper::fromEntityToDTO)
+                .collect(Collectors.toList());
     }
 
-    public List<TestEntity> getTestsByTitle(String title) {
-        return testRepository.getTestEntitiesByTitle(title);
+    public List<TestDTO> getTestsByTitle(String title) {
+        List<TestEntity> testEntityList = testRepository.getTestEntitiesByTitle(title);
+
+        return testEntityList.stream()
+                .map(EntityMapper::fromEntityToDTO)
+                .collect(Collectors.toList());
     }
 
-    public List<TestEntity> getTestsByCategory(String category) {
-        return testRepository.getTestEntitiesByCategory(category);
+    public List<TestDTO> getTestsByCategory(String category) {
+        List<TestEntity> testEntityList = testRepository.getTestEntitiesByCategory(category);
+
+        return testEntityList.stream()
+                .map(EntityMapper::fromEntityToDTO)
+                .collect(Collectors.toList());
     }
 
-    public List<TestEntity> getTestsByCreateDate(LocalDate date) {
-        return testRepository.getTestEntitiesByCreateDate(date);
+    public List<TestDTO> getTestsByCreateDate(LocalDate date) {
+        List<TestEntity> testEntityList = testRepository.getTestEntitiesByCreateDate(date);
+
+        return testEntityList.stream()
+                .map(EntityMapper::fromEntityToDTO)
+                .collect(Collectors.toList());
     }
 
-    public void logUpdate(TestEntity oldTest, TestEntity newTest, Long updateUserID) {
+    public void logUpdate(TestEntity oldTest, TestDTO newTest, Long updateUserID) {
         UpdateLogEntity testLog;
 
         if (!oldTest.getTitle().equalsIgnoreCase(newTest.getTitle())) {

@@ -1,13 +1,14 @@
 create table tests
 (
-    test_id     serial
+    test_id        serial
         constraint tests_pk
             primary key,
-    test_title  varchar   not null,
-    description varchar,
-    category    varchar   not null,
-    create_date date      not null,
-    update_date timestamp not null
+    test_title     varchar   not null,
+    description    varchar,
+    category       varchar   not null,
+    create_date    date      not null,
+    create_user_id int       not null,
+    update_date    timestamp not null
 );
 
 create unique index tests_test_id_uindex

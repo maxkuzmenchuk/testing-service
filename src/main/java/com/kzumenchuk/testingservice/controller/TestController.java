@@ -1,6 +1,6 @@
 package com.kzumenchuk.testingservice.controller;
 
-import com.kzumenchuk.testingservice.repository.model.TestEntity;
+import com.kzumenchuk.testingservice.repository.model.dto.TestDTO;
 import com.kzumenchuk.testingservice.service.TestService;
 import com.kzumenchuk.testingservice.util.CustomResponse;
 import com.kzumenchuk.testingservice.util.requests.DeleteTestRequest;
@@ -25,9 +25,10 @@ public class TestController {
     }
 
     @PostMapping("/add-new")
-    public ResponseEntity<Map<String, Object>> addTest(@RequestBody TestEntity test) {
+    public ResponseEntity<Map<String, Object>> addTest(@RequestBody TestDTO testDTO) {
         try {
-            TestEntity newTest = testService.addNewTest(test);
+
+            TestDTO newTest = testService.addNewTest(testDTO);
             successResponseBody.clear();
             successResponseBody = CustomResponse.createSuccessResponse("Test created successfully", newTest);
 
@@ -45,11 +46,10 @@ public class TestController {
     }
 
     @PostMapping("/edit")
-    public ResponseEntity<Map<String, Object>> editTest(@RequestBody TestEntity test) {
+    public ResponseEntity<Map<String, Object>> editTest(@RequestBody TestDTO testDTO) {
         try {
-            TestEntity editedTest = testService.editTest(test);
             successResponseBody.clear();
-            successResponseBody = CustomResponse.createSuccessResponse("Test updated successfully", editedTest);
+            successResponseBody = testService.editTest(testDTO);
 
             return ResponseEntity
                     .status(HttpStatus.OK)
