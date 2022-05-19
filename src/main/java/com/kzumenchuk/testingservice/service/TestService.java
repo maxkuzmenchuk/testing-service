@@ -5,12 +5,14 @@ import com.kzumenchuk.testingservice.exception.TestNotFoundException;
 import com.kzumenchuk.testingservice.repository.TestRepository;
 import com.kzumenchuk.testingservice.repository.model.*;
 import com.kzumenchuk.testingservice.repository.model.dto.TestDTO;
+import com.kzumenchuk.testingservice.service.interfaces.ITestService;
 import com.kzumenchuk.testingservice.util.EntityMapper;
 import com.kzumenchuk.testingservice.util.EntityType;
 import com.kzumenchuk.testingservice.util.UpdateLogUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -18,21 +20,15 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
-public class TestService {
+@RequiredArgsConstructor
+public class TestService implements ITestService {
     private final TestRepository testRepository;
     private final QuestionService questionService;
     private final TagsService tagsService;
-
     private final UpdateLogService updateLogService;
 
-    public TestService(TestRepository testRepository, QuestionService questionService, TagsService tagsService, UpdateLogService updateLogService) {
-        this.testRepository = testRepository;
-        this.questionService = questionService;
-        this.tagsService = tagsService;
-        this.updateLogService = updateLogService;
-    }
-
-    @Transactional(rollbackOn = Exception.class)
+    @Transactional(rollbackFor = Exception.class)
+    @Override
     public TestDTO addNewTest(TestDTO testDTO) {
         boolean isExists = false;
         List<TestEntity> testEntityList = testRepository.getTestEntitiesByTitle(testDTO.getTitle());
@@ -97,7 +93,8 @@ public class TestService {
         }
     }
 
-    @Transactional(rollbackOn = Exception.class)
+    @Transactional(rollbackFor = Exception.class)
+    @Override
     public Map<String, Object> editTest(TestDTO editedTestData) {
         Optional<TestEntity> databaseTestData = testRepository.findById(editedTestData.getTestID());
         Map<String, Object> hmResult = new HashMap<>();
@@ -109,7 +106,7 @@ public class TestService {
             tagsService.editTags(editedTestData.getTags(), 1L);
 
             if (!test.equals(EntityMapper.fromDTOToEntity(editedTestData))) {
-                logUpdate(test, editedTestData, 1L);
+                logTestUpdate(test, editedTestData, 1L);
 
                 test.setTitle(editedTestData.getTitle());
                 test.setDescription(editedTestData.getDescription());
@@ -132,7 +129,8 @@ public class TestService {
         }
     }
 
-    @Transactional(rollbackOn = Exception.class)
+    @Transactional(rollbackFor = Exception.class)
+    @Override
     public void deleteTestById(Long[] IDs) {
         Stream.of(IDs)
                 .filter(Objects::nonNull)
@@ -145,6 +143,7 @@ public class TestService {
                 });
     }
 
+    @Override
     public TestDTO getTestByID(Long id) {
         Optional<TestEntity> testEntityOptional = testRepository.findById(id);
 
@@ -157,57 +156,53 @@ public class TestService {
         }
     }
 
-    public List<TestDTO> getAllTests() {
-        List<TestEntity> testEntityList = testRepository.findAll();
+    @Override
+    public List<TestDTO> getTests(String searchType, String searchValue) {
+        List<TestEntity> testEntityList = new ArrayList<>();
+        switch (searchType) {
+            case "all":
+                testEntityList = testRepository.findAll();
+                break;
+            case "title":
+                testEntityList = testRepository.getTestEntitiesByTitle(searchValue);
+                break;
+            case "category":
+                testEntityList = testRepository.getTestEntitiesByCategory(searchValue);
+                break;
+            case "tag":
+                testEntityList = testRepository.getTestEntitiesByTag(searchValue);
+                break;
+            case "createDate":
+                LocalDate date = LocalDate.parse(searchValue);
+                testEntityList = testRepository.getTestEntitiesByCreateDate(date);
+                break;
+        }
 
         return testEntityList.stream()
                 .map(EntityMapper::fromEntityToDTO)
                 .collect(Collectors.toList());
     }
 
-    public List<TestDTO> getTestsByTitle(String title) {
-        List<TestEntity> testEntityList = testRepository.getTestEntitiesByTitle(title);
-
-        return testEntityList.stream()
-                .map(EntityMapper::fromEntityToDTO)
-                .collect(Collectors.toList());
-    }
-
-    public List<TestDTO> getTestsByCategory(String category) {
-        List<TestEntity> testEntityList = testRepository.getTestEntitiesByCategory(category);
-
-        return testEntityList.stream()
-                .map(EntityMapper::fromEntityToDTO)
-                .collect(Collectors.toList());
-    }
-
-    public List<TestDTO> getTestsByCreateDate(LocalDate date) {
-        List<TestEntity> testEntityList = testRepository.getTestEntitiesByCreateDate(date);
-
-        return testEntityList.stream()
-                .map(EntityMapper::fromEntityToDTO)
-                .collect(Collectors.toList());
-    }
-
-    public void logUpdate(TestEntity oldTest, TestDTO newTest, Long updateUserID) {
-        UpdateLogEntity testLog;
+    @Transactional(rollbackFor = Exception.class)
+    public void logTestUpdate(TestEntity oldTest, TestDTO newTest, Long updateUserID) {
+        UpdateLogEntity logEntity;
 
         if (!oldTest.getTitle().equalsIgnoreCase(newTest.getTitle())) {
-            testLog = UpdateLogUtil.createLogEntity(oldTest.getTestID(), EntityType.TEST,
+            logEntity = UpdateLogUtil.createLogEntity(oldTest.getTestID(), EntityType.TEST,
                     "U", "title", oldTest.getTitle(), newTest.getTitle(), updateUserID);
-            updateLogService.saveLog(testLog);
+            updateLogService.saveLog(logEntity);
         }
 
         if (!oldTest.getDescription().equalsIgnoreCase(newTest.getDescription())) {
-            testLog = UpdateLogUtil.createLogEntity(oldTest.getTestID(), EntityType.TEST,
+            logEntity = UpdateLogUtil.createLogEntity(oldTest.getTestID(), EntityType.TEST,
                     "U", "description", oldTest.getDescription(), newTest.getDescription(), updateUserID);
-            updateLogService.saveLog(testLog);
+            updateLogService.saveLog(logEntity);
         }
 
         if (!oldTest.getCategory().equalsIgnoreCase(newTest.getCategory())) {
-            testLog = UpdateLogUtil.createLogEntity(oldTest.getTestID(), EntityType.TEST,
+            logEntity = UpdateLogUtil.createLogEntity(oldTest.getTestID(), EntityType.TEST,
                     "U", "category", oldTest.getCategory(), newTest.getCategory(), updateUserID);
-            updateLogService.saveLog(testLog);
+            updateLogService.saveLog(logEntity);
         }
     }
 }

@@ -4,9 +4,12 @@ import com.kzumenchuk.testingservice.exception.QuestionNotFoundException;
 import com.kzumenchuk.testingservice.repository.QuestionRepository;
 import com.kzumenchuk.testingservice.repository.model.QuestionEntity;
 import com.kzumenchuk.testingservice.repository.model.UpdateLogEntity;
+import com.kzumenchuk.testingservice.service.interfaces.IQuestionService;
 import com.kzumenchuk.testingservice.util.EntityType;
 import com.kzumenchuk.testingservice.util.UpdateLogUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -14,17 +17,14 @@ import java.util.Optional;
 import java.util.Set;
 
 @Service
-public class QuestionService {
+@RequiredArgsConstructor
+public class QuestionService implements IQuestionService {
     private final QuestionRepository questionRepository;
     private final OptionsService optionsService;
     private final UpdateLogService updateLogService;
 
-    public QuestionService(QuestionRepository questionRepository, OptionsService optionsService, UpdateLogService updateLogService) {
-        this.questionRepository = questionRepository;
-        this.optionsService = optionsService;
-        this.updateLogService = updateLogService;
-    }
-
+    @Transactional(rollbackFor = Exception.class)
+    @Override
     public void editQuestions(Set<QuestionEntity> editedQuestions, Long updateUserID) {
         editedQuestions.stream()
                 .filter(Objects::nonNull)
@@ -51,7 +51,8 @@ public class QuestionService {
                 });
     }
 
-    private void logQuestionUpdate(QuestionEntity oldQuestion, QuestionEntity newQuestion, Long updateUserID) {
+    @Transactional(rollbackFor = Exception.class)
+    public void logQuestionUpdate(QuestionEntity oldQuestion, QuestionEntity newQuestion, Long updateUserID) {
         if (!oldQuestion.getTitle().equalsIgnoreCase(newQuestion.getTitle())) {
             UpdateLogEntity tagLog = UpdateLogUtil.createLogEntity(oldQuestion.getQuestionID(), EntityType.QUESTION,
                     "U", "title", oldQuestion.getTitle(), newQuestion.getTitle(), updateUserID);

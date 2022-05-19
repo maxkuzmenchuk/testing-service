@@ -4,9 +4,12 @@ import com.kzumenchuk.testingservice.exception.TagNotFoundException;
 import com.kzumenchuk.testingservice.repository.TagsRepository;
 import com.kzumenchuk.testingservice.repository.model.TagEntity;
 import com.kzumenchuk.testingservice.repository.model.UpdateLogEntity;
+import com.kzumenchuk.testingservice.service.interfaces.ITagsService;
 import com.kzumenchuk.testingservice.util.EntityType;
 import com.kzumenchuk.testingservice.util.UpdateLogUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -14,19 +17,13 @@ import java.util.Optional;
 import java.util.Set;
 
 @Service
-public class TagsService {
+@RequiredArgsConstructor
+public class TagsService implements ITagsService {
     private final TagsRepository tagsRepository;
     private final UpdateLogService updateLogService;
 
-    public TagsService(TagsRepository tagsRepository, UpdateLogService updateLogService) {
-        this.tagsRepository = tagsRepository;
-        this.updateLogService = updateLogService;
-    }
-
-    public TagEntity saveOptions(TagEntity tagEntity) {
-        return tagsRepository.save(tagEntity);
-    }
-
+    @Transactional(rollbackFor = Exception.class)
+    @Override
     public void editTags(Set<TagEntity> editedTags, Long updateUserID) {
         editedTags.stream()
                 .filter(Objects::nonNull)
@@ -37,9 +34,7 @@ public class TagsService {
                         TagEntity tag = databaseTagData.get();
 
                         if (!tag.equals(editedTag)) {
-                            UpdateLogEntity tagLog = UpdateLogUtil.createLogEntity(tag.getTagID(), EntityType.TAG,
-                                    "U", "value", tag.getValue(), editedTag.getValue(), updateUserID);
-                            updateLogService.saveLog(tagLog);
+                            logTagsUpdate(updateUserID, editedTag, tag);
 
                             tag.setValue(editedTag.getValue());
                             tag.setUpdateDate(LocalDateTime.now());
@@ -50,5 +45,12 @@ public class TagsService {
                         throw new TagNotFoundException("Tag (id = " + editedTag.getTagID() + ") not found");
                     }
                 });
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void logTagsUpdate(Long updateUserID, TagEntity editedTag, TagEntity tag) {
+        UpdateLogEntity logEntity = UpdateLogUtil.createLogEntity(tag.getTagID(), EntityType.TAG,
+                "U", "value", tag.getValue(), editedTag.getValue(), updateUserID);
+        updateLogService.saveLog(logEntity);
     }
 }

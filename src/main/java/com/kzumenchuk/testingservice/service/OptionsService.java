@@ -5,9 +5,12 @@ import com.kzumenchuk.testingservice.repository.OptionsRepository;
 import com.kzumenchuk.testingservice.repository.model.OptionEntity;
 import com.kzumenchuk.testingservice.repository.model.QuestionEntity;
 import com.kzumenchuk.testingservice.repository.model.UpdateLogEntity;
+import com.kzumenchuk.testingservice.service.interfaces.IOptionsService;
 import com.kzumenchuk.testingservice.util.EntityType;
 import com.kzumenchuk.testingservice.util.UpdateLogUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -15,20 +18,14 @@ import java.util.Optional;
 import java.util.Set;
 
 @Service
-public class OptionsService {
+@RequiredArgsConstructor
+public class OptionsService implements IOptionsService {
     private final OptionsRepository optionsRepository;
 
     private final UpdateLogService updateLogService;
 
-    public OptionsService(OptionsRepository optionsRepository, UpdateLogService updateLogService) {
-        this.optionsRepository = optionsRepository;
-        this.updateLogService = updateLogService;
-    }
-
-    public OptionEntity saveTags(OptionEntity optionEntity) {
-        return optionsRepository.save(optionEntity);
-    }
-
+    @Transactional(rollbackFor = Exception.class)
+    @Override
     public void updateOptions(QuestionEntity editedQuestion, Long updateUserID) {
         Set<OptionEntity> editedOptions = editedQuestion.getOptions();
 
@@ -42,7 +39,7 @@ public class OptionsService {
 
                         if (!editedOption.equals(optionEntity)) {
 
-                            logUpdateOption(optionEntity, editedOption, updateUserID);
+                            logOptionUpdate(optionEntity, editedOption, updateUserID);
 
                             optionEntity.setValue(editedOption.getValue());
                             optionEntity.setCorrect(editedOption.isCorrect());
@@ -56,17 +53,19 @@ public class OptionsService {
                 });
     }
 
-    private void logUpdateOption(OptionEntity oldOption, OptionEntity newOption, Long updateUserID) {
+
+    @Transactional(rollbackFor = Exception.class)
+    public void logOptionUpdate(OptionEntity oldOption, OptionEntity newOption, Long updateUserID) {
         if (!oldOption.getValue().equalsIgnoreCase(newOption.getValue())) {
-            UpdateLogEntity tagLog = UpdateLogUtil.createLogEntity(oldOption.getOptionID(), EntityType.OPTION,
+            UpdateLogEntity logEntity = UpdateLogUtil.createLogEntity(oldOption.getOptionID(), EntityType.OPTION,
                     "U", "value", oldOption.getValue(), newOption.getValue(), updateUserID);
-            updateLogService.saveLog(tagLog);
+            updateLogService.saveLog(logEntity);
         }
 
         if (oldOption.isCorrect() != newOption.isCorrect()) {
-            UpdateLogEntity tagLog = UpdateLogUtil.createLogEntity(oldOption.getOptionID(), EntityType.OPTION,
+            UpdateLogEntity logEntity = UpdateLogUtil.createLogEntity(oldOption.getOptionID(), EntityType.OPTION,
                     "U", "isCorrect", String.valueOf(oldOption.isCorrect()), String.valueOf(newOption.isCorrect()), updateUserID);
-            updateLogService.saveLog(tagLog);
+            updateLogService.saveLog(logEntity);
         }
     }
 }

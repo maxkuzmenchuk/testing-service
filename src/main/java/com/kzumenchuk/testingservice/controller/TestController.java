@@ -4,25 +4,22 @@ import com.kzumenchuk.testingservice.repository.model.dto.TestDTO;
 import com.kzumenchuk.testingservice.service.TestService;
 import com.kzumenchuk.testingservice.util.CustomResponse;
 import com.kzumenchuk.testingservice.util.requests.DeleteTestRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/tests")
 public class TestController {
     private final TestService testService;
     private Map<String, Object> successResponseBody = new HashMap<>();
     private Map<String, Object> errorResponseBody = new HashMap<>();
-
-    public TestController(TestService testService) {
-        this.testService = testService;
-    }
 
     @PostMapping("/add-new")
     public ResponseEntity<Map<String, Object>> addTest(@RequestBody TestDTO testDTO) {
@@ -94,7 +91,7 @@ public class TestController {
     public ResponseEntity<Map<String, Object>> getAllTests() {
         try {
             successResponseBody.clear();
-            successResponseBody = CustomResponse.createSuccessResponse("Success", testService.getAllTests());
+            successResponseBody = CustomResponse.createSuccessResponse("Success", testService.getTests("all", ""));
 
             return ResponseEntity
                     .status(HttpStatus.OK)
@@ -132,7 +129,7 @@ public class TestController {
     public ResponseEntity<Map<String, Object>> getByTitle(@RequestParam("title") String title) {
         try {
             successResponseBody.clear();
-            successResponseBody = CustomResponse.createSuccessResponse("Success", testService.getTestsByTitle(title));
+            successResponseBody = CustomResponse.createSuccessResponse("Success", testService.getTests("title", title));
 
             return ResponseEntity
                     .status(HttpStatus.OK)
@@ -151,7 +148,7 @@ public class TestController {
     public ResponseEntity<Map<String, Object>> getByCategory(@RequestParam("category") String category) {
         try {
             successResponseBody.clear();
-            successResponseBody = CustomResponse.createSuccessResponse("Success", testService.getTestsByCategory(category));
+            successResponseBody = CustomResponse.createSuccessResponse("Success", testService.getTests("category", category));
 
             return ResponseEntity
                     .status(HttpStatus.OK)
@@ -169,10 +166,8 @@ public class TestController {
     @GetMapping("/get-by-date")
     public ResponseEntity<Map<String, Object>> getByDate(@RequestParam("date") String dateSearch) {
         try {
-            LocalDate date = LocalDate.parse(dateSearch);
-
             successResponseBody.clear();
-            successResponseBody = CustomResponse.createSuccessResponse("Success", testService.getTestsByCreateDate(date));
+            successResponseBody = CustomResponse.createSuccessResponse("Success", testService.getTests("createDate", dateSearch));
 
             return ResponseEntity
                     .status(HttpStatus.OK)
