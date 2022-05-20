@@ -10,12 +10,12 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Repository
-public interface TestRepository extends JpaRepository<TestEntity, Long> {
+public interface ITestRepository extends JpaRepository<TestEntity, Long> {
     List<TestEntity> getTestEntitiesByCategory(String category);
 
     List<TestEntity> getTestEntitiesByTitle(String title);
 
-    List<TestEntity> getTestEntitiesByCreateDate(LocalDate date);
+    List<TestEntity> getTestEntitiesByCreatingDate(LocalDate date);
 
     @Query("select test from TestEntity test where test.testID in (select tag.testEntity.testID from TagEntity tag where tag.value = :tag)")
     List<TestEntity> getTestEntitiesByTag(@Param("tag") String tag);

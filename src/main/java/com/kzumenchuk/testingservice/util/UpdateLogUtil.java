@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 public class UpdateLogUtil {
     public static UpdateLogEntity createLogEntity(Long entityID,
                                                   EntityType entityType,
-                                                  String operationType,
+                                                  OperationType operationType,
                                                   String updatedField,
                                                   String oldValue,
                                                   String newValue,
@@ -19,8 +19,8 @@ public class UpdateLogUtil {
                 .updatedField(updatedField)
                 .oldValue(oldValue)
                 .newValue(newValue)
-                .updateDate(LocalDateTime.now())
-                .updateUserID(updateUserID)
+                .updatingDate(LocalDateTime.now())
+                .updatingUserID(updateUserID)
                 .build();
     }
 }

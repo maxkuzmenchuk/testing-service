@@ -1,6 +1,7 @@
 package com.kzumenchuk.testingservice.repository.model;
 
 import com.kzumenchuk.testingservice.util.EntityType;
+import com.kzumenchuk.testingservice.util.OperationType;
 import lombok.*;
 
 import javax.persistence.*;
@@ -16,8 +17,8 @@ import java.time.LocalDateTime;
 public class UpdateLogEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "update_log_id")
-    private Long updateLogID;
+    @Column(name = "updating_log_id")
+    private Long updatingLogID;
 
     @Column(name = "entity_id")
     private Long entityID;
@@ -27,7 +28,8 @@ public class UpdateLogEntity {
     private EntityType entityType;
 
     @Column(name = "operation_type")
-    private String operationType;
+    @Enumerated(EnumType.STRING)
+    private OperationType operationType;
 
     @Column(name = "updated_field")
     private String updatedField;
@@ -38,9 +40,9 @@ public class UpdateLogEntity {
     @Column(name = "new_value")
     private String newValue;
 
-    @Column(name = "update_date")
-    private LocalDateTime updateDate;
+    @Column(name = "updating_date")
+    private LocalDateTime updatingDate;
 
-    @Column(name = "update_user_id")
-    private Long updateUserID;
+    @Column(name = "updating_user_id")
+    private Long updatingUserID;
 }

@@ -28,8 +28,8 @@ public class QuestionEntity {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "update_date")
-    private LocalDateTime updateDate;
+    @Column(name = "updating_date")
+    private LocalDateTime updatingDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "test_id", nullable = false)

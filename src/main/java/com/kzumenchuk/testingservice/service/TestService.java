@@ -2,13 +2,14 @@ package com.kzumenchuk.testingservice.service;
 
 import com.kzumenchuk.testingservice.exception.TestAlreadyExistsException;
 import com.kzumenchuk.testingservice.exception.TestNotFoundException;
-import com.kzumenchuk.testingservice.repository.TestRepository;
-import com.kzumenchuk.testingservice.repository.model.*;
+import com.kzumenchuk.testingservice.repository.ITestRepository;
+import com.kzumenchuk.testingservice.repository.model.OptionEntity;
+import com.kzumenchuk.testingservice.repository.model.QuestionEntity;
+import com.kzumenchuk.testingservice.repository.model.TagEntity;
+import com.kzumenchuk.testingservice.repository.model.TestEntity;
 import com.kzumenchuk.testingservice.repository.model.dto.TestDTO;
 import com.kzumenchuk.testingservice.service.interfaces.ITestService;
 import com.kzumenchuk.testingservice.util.EntityMapper;
-import com.kzumenchuk.testingservice.util.EntityType;
-import com.kzumenchuk.testingservice.util.UpdateLogUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +23,7 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class TestService implements ITestService {
-    private final TestRepository testRepository;
+    private final ITestRepository testRepository;
     private final QuestionService questionService;
     private final TagsService tagsService;
     private final UpdateLogService updateLogService;
@@ -46,9 +47,10 @@ public class TestService implements ITestService {
                     .title(testDTO.getTitle())
                     .description(testDTO.getDescription())
                     .category(testDTO.getCategory())
-                    .createDate(LocalDate.now())
-                    .createUserID(testDTO.getCreateUserID())
-                    .updateDate(LocalDateTime.now())
+                    .creatingDate(LocalDate.now())
+                    .creatorID(testDTO.getCreatorID())
+                    .isArchived(false)
+                    .updatingDate(LocalDateTime.now())
                     .build();
 
             Set<QuestionEntity> questions = testDTO.getQuestions();
@@ -59,7 +61,7 @@ public class TestService implements ITestService {
                 options.stream()
                         .filter(Objects::nonNull)
                         .forEach((x) -> {
-                            x.setUpdateDate(LocalDateTime.now());
+                            x.setUpdatingDate(LocalDateTime.now());
                             x.setQuestion(q);
                         });
             }
@@ -67,14 +69,14 @@ public class TestService implements ITestService {
             questions.stream()
                     .filter(Objects::nonNull)
                     .forEach((x) -> {
-                        x.setUpdateDate(LocalDateTime.now());
+                        x.setUpdatingDate(LocalDateTime.now());
                         x.setTest(testEntity);
                     });
 
             tags.stream()
                     .filter(Objects::nonNull)
                     .forEach(x -> {
-                        x.setUpdateDate(LocalDateTime.now());
+                        x.setUpdatingDate(LocalDateTime.now());
                         x.setTestEntity(testEntity);
                     });
 
@@ -82,10 +84,7 @@ public class TestService implements ITestService {
             testEntity.setTags(tags);
 
             TestEntity savedTest = testRepository.saveAndFlush(testEntity);
-
-            UpdateLogEntity insertTestLog = UpdateLogUtil.createLogEntity(savedTest.getTestID(), EntityType.TEST,
-                    "I", "", "", "", 1L);
-            updateLogService.saveLog(insertTestLog);
+            updateLogService.logTestInsert(savedTest.getTestID());
 
             return EntityMapper.fromEntityToDTO(savedTest);
         } else {
@@ -102,18 +101,23 @@ public class TestService implements ITestService {
         if (databaseTestData.isPresent()) {
             TestEntity test = databaseTestData.get();
 
+
             questionService.editQuestions(editedTestData.getQuestions(), 1L);
             tagsService.editTags(editedTestData.getTags(), 1L);
 
             if (!test.equals(EntityMapper.fromDTOToEntity(editedTestData))) {
-                logTestUpdate(test, editedTestData, 1L);
+                TestEntity tempTest = EntityMapper.createTestClone(test); // test entity with old values. Created for logging
 
                 test.setTitle(editedTestData.getTitle());
                 test.setDescription(editedTestData.getDescription());
                 test.setCategory(editedTestData.getCategory());
-                test.setUpdateDate(LocalDateTime.now());
+                test.setUpdatingDate(LocalDateTime.now());
+                test.setArchived(editedTestData.isArchived());
 
                 TestEntity updatedTest = testRepository.saveAndFlush(test);
+
+                updateLogService.logTestUpdate(tempTest, EntityMapper.fromEntityToDTO(updatedTest), 1L);
+
                 hmResult.put("message", "Test updated successfully");
                 hmResult.put("result", EntityMapper.fromEntityToDTO(updatedTest));
 
@@ -137,9 +141,7 @@ public class TestService implements ITestService {
                 .forEach((id) -> {
                     testRepository.deleteById(id);
 
-                    UpdateLogEntity deletedTestLog = UpdateLogUtil.createLogEntity(id, EntityType.TEST,
-                            "D", "", "", "", 1L);
-                    updateLogService.saveLog(deletedTestLog);
+                    updateLogService.logTestDelete(id);
                 });
     }
 
@@ -174,35 +176,12 @@ public class TestService implements ITestService {
                 break;
             case "createDate":
                 LocalDate date = LocalDate.parse(searchValue);
-                testEntityList = testRepository.getTestEntitiesByCreateDate(date);
+                testEntityList = testRepository.getTestEntitiesByCreatingDate(date);
                 break;
         }
 
         return testEntityList.stream()
                 .map(EntityMapper::fromEntityToDTO)
                 .collect(Collectors.toList());
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    public void logTestUpdate(TestEntity oldTest, TestDTO newTest, Long updateUserID) {
-        UpdateLogEntity logEntity;
-
-        if (!oldTest.getTitle().equalsIgnoreCase(newTest.getTitle())) {
-            logEntity = UpdateLogUtil.createLogEntity(oldTest.getTestID(), EntityType.TEST,
-                    "U", "title", oldTest.getTitle(), newTest.getTitle(), updateUserID);
-            updateLogService.saveLog(logEntity);
-        }
-
-        if (!oldTest.getDescription().equalsIgnoreCase(newTest.getDescription())) {
-            logEntity = UpdateLogUtil.createLogEntity(oldTest.getTestID(), EntityType.TEST,
-                    "U", "description", oldTest.getDescription(), newTest.getDescription(), updateUserID);
-            updateLogService.saveLog(logEntity);
-        }
-
-        if (!oldTest.getCategory().equalsIgnoreCase(newTest.getCategory())) {
-            logEntity = UpdateLogUtil.createLogEntity(oldTest.getTestID(), EntityType.TEST,
-                    "U", "category", oldTest.getCategory(), newTest.getCategory(), updateUserID);
-            updateLogService.saveLog(logEntity);
-        }
     }
 }

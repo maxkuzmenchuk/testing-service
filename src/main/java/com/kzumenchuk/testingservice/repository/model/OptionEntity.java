@@ -27,8 +27,8 @@ public class OptionEntity {
     @Column(name = "is_correct")
     private boolean isCorrect;
 
-    @Column(name = "update_date")
-    private LocalDateTime updateDate;
+    @Column(name = "updating_date")
+    private LocalDateTime updatingDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id", nullable = false)

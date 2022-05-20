@@ -1,9 +1,10 @@
 package com.kzumenchuk.testingservice.repository;
 
-import com.kzumenchuk.testingservice.repository.model.OptionEntity;
+import com.kzumenchuk.testingservice.repository.model.UpdateLogEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface OptionsRepository extends JpaRepository<OptionEntity, Long> {
+public interface IUpdateLogRepository extends JpaRepository<UpdateLogEntity, Long> {
+
 }

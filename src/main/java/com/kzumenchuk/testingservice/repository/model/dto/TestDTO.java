@@ -18,9 +18,10 @@ public class TestDTO {
     private String title;
     private String description;
     private String category;
-    private LocalDate createDate;
-    private LocalDateTime updateDate;
-    private Long createUserID;
+    private LocalDate creatingDate;
+    private LocalDateTime updatingDate;
+    private Long creatorID;
+    private boolean isArchived;
     private Set<QuestionEntity> questions;
     private Set<TagEntity> tags;
 }

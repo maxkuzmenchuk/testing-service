@@ -31,14 +31,17 @@ public class TestEntity {
     @Column(name = "category")
     private String category;
 
-    @Column(name = "create_date")
-    private LocalDate createDate;
+    @Column(name = "creating_date")
+    private LocalDate creatingDate;
 
-    @Column(name = "update_date")
-    private LocalDateTime updateDate;
+    @Column(name = "updating_date")
+    private LocalDateTime updatingDate;
 
-    @Column(name = "create_user_id")
-    private Long createUserID;
+    @Column(name = "creator_id")
+    private Long creatorID;
+
+    @Column(name = "is_archived")
+    private boolean isArchived;
 
     @OneToMany(cascade = CascadeType.ALL,
             fetch = FetchType.LAZY,

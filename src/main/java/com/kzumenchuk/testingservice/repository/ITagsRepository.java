@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface TagsRepository extends JpaRepository<TagEntity, Long> {
+public interface ITagsRepository extends JpaRepository<TagEntity, Long> {
     // TODO: CREATE REPOSITORY METHODS FOR SEARCHING TESTS BY TAGS
 }

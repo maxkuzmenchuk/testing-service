@@ -10,9 +10,10 @@ public class EntityMapper {
                 .title(modelDTO.getTitle())
                 .description(modelDTO.getDescription())
                 .category(modelDTO.getCategory())
-                .createDate(modelDTO.getCreateDate())
-                .createUserID(modelDTO.getCreateUserID())
-                .updateDate(modelDTO.getUpdateDate())
+                .creatingDate(modelDTO.getCreatingDate())
+                .creatorID(modelDTO.getCreatorID())
+                .isArchived(modelDTO.isArchived())
+                .updatingDate(modelDTO.getUpdatingDate())
                 .questions(modelDTO.getQuestions())
                 .tags(modelDTO.getTags())
                 .build();
@@ -24,11 +25,27 @@ public class EntityMapper {
                 .title(entity.getTitle())
                 .description(entity.getDescription())
                 .category(entity.getCategory())
-                .createDate(entity.getCreateDate())
-                .createUserID(entity.getCreateUserID())
-                .updateDate(entity.getUpdateDate())
+                .creatingDate(entity.getCreatingDate())
+                .creatorID(entity.getCreatorID())
+                .isArchived(entity.isArchived())
+                .updatingDate(entity.getUpdatingDate())
                 .questions(entity.getQuestions())
                 .tags(entity.getTags())
+                .build();
+    }
+
+    public static TestEntity createTestClone(TestEntity test) {
+        return TestEntity.builder()
+                .testID(test.getTestID())
+                .title(test.getTitle())
+                .description(test.getDescription())
+                .category(test.getCategory())
+                .creatingDate(test.getCreatingDate())
+                .creatorID(test.getCreatorID())
+                .isArchived(test.isArchived())
+                .updatingDate(test.getUpdatingDate())
+                .questions(test.getQuestions())
+                .tags(test.getTags())
                 .build();
     }
 }
