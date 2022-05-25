@@ -146,7 +146,7 @@ public class FileDataDataService implements IFileDataService {
 
     @Override
     public FileDataEntity getFileByTestID(Long testID) throws FileNotFoundException {
-        Optional<FileDataEntity> optionalFile = fileDataRepository.getFileDataEntityBy(testID);
+        Optional<FileDataEntity> optionalFile = fileDataRepository.getFileDataEntityByTestID(testID);
         if (optionalFile.isPresent()) {
             File file = new File(optionalFile.get().getFileSourceUrl());
 
@@ -180,7 +180,7 @@ public class FileDataDataService implements IFileDataService {
 
     @Override
     public void updateFileData(Long testID) {
-        Optional<FileDataEntity> optionalFileData = fileDataRepository.getFileDataEntityBy(testID);
+        Optional<FileDataEntity> optionalFileData = fileDataRepository.getFileDataEntityByTestID(testID);
 
         if (optionalFileData.isPresent()) {
             generateTestDataToPDF(testID);

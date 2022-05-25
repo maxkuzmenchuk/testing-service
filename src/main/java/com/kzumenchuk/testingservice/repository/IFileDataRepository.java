@@ -8,7 +8,7 @@ import java.util.Optional;
 
 @Repository
 public interface IFileDataRepository extends JpaRepository<FileDataEntity, Long> {
-    Optional<FileDataEntity> getFileDataEntityBy(Long id);
+    Optional<FileDataEntity> getFileDataEntityByTestID(Long id);
 
     void deleteAllByTestID(Long testID);
 
