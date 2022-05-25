@@ -8,7 +8,7 @@ public interface IUpdateLogService {
 
     void logTestUpdate(TestEntity oldTest, TestDTO newTest, Long updateUserID);
 
-    void logTestDelete(Long testID);
+    void logTestDelete(Long testID, Long userID);
 
     void logTestArchiving(Long testID);
 
@@ -23,4 +23,6 @@ public interface IUpdateLogService {
     void logTagsUpdate(Long updateUserID, TagEntity editedTag, TagEntity tag);
 
     void saveLog(UpdateLogEntity logEntity);
+
+    void logResultDelete(Long resultID, Long userID);
 }

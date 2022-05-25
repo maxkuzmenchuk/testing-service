@@ -1,5 +1,6 @@
 package com.kzumenchuk.testingservice.repository.model;
 
+import com.kzumenchuk.testingservice.util.enums.FileKind;
 import lombok.*;
 import org.hibernate.Hibernate;
 
@@ -19,6 +20,10 @@ public class FileDataEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "file_id")
     public Long fileID;
+
+    @Column(name = "file_kind")
+    @Enumerated(EnumType.STRING)
+    public FileKind fileKind;
 
     @Column(name = "test_id")
     private Long testID;

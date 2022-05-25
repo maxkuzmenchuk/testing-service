@@ -3,7 +3,7 @@ package com.kzumenchuk.testingservice.controller;
 import com.kzumenchuk.testingservice.repository.model.dto.TestDTO;
 import com.kzumenchuk.testingservice.service.TestService;
 import com.kzumenchuk.testingservice.util.CustomResponse;
-import com.kzumenchuk.testingservice.util.requests.DeleteTestRequest;
+import com.kzumenchuk.testingservice.util.requests.DeleteRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -62,9 +62,9 @@ public class TestController {
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<Map<String, Object>> deleteTest(@RequestBody DeleteTestRequest deleteTestRequest) {
+    public ResponseEntity<Map<String, Object>> deleteTest(@RequestBody DeleteRequest deleteRequest) {
         try {
-            testService.deleteTestById(deleteTestRequest.getDeleteIDs());
+            testService.deleteTestById(deleteRequest);
             successResponseBody.clear();
             successResponseBody = CustomResponse.createSuccessResponse("Tests deleted successfully", "");
 

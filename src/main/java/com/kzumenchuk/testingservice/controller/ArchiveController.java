@@ -43,7 +43,7 @@ public class ArchiveController {
     @PostMapping("/restore-from-archive")
     public ResponseEntity<Map<String, Object>> restoreFromArchive(@RequestParam("id") Long id) {
         try {
-            archiveService.restoreFromArchive(id);
+            archiveService.restoreFromArchive(id, 1L);
             successResponseBody.clear();
             successResponseBody = CustomResponse.createSuccessResponse("Test restored from archive successfully", "");
 
@@ -63,7 +63,7 @@ public class ArchiveController {
     @DeleteMapping("/delete")
     public ResponseEntity<Map<String, Object>> deleteFromArchive(@RequestParam("id") Long id) {
         try {
-            archiveService.deleteFromArchive(id, OperationType.DELETE);
+            archiveService.deleteFromArchive(id, OperationType.DELETE, 1L);
             successResponseBody.clear();
             successResponseBody = CustomResponse.createSuccessResponse("Test deleted from archive successfully", "");
 

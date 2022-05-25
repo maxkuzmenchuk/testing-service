@@ -1,7 +1,9 @@
 package com.kzumenchuk.testingservice.util;
 
 import com.kzumenchuk.testingservice.repository.model.TestEntity;
+import com.kzumenchuk.testingservice.repository.model.TestResultEntity;
 import com.kzumenchuk.testingservice.repository.model.dto.TestDTO;
+import com.kzumenchuk.testingservice.repository.model.dto.TestResultDTO;
 
 public class EntityMapper {
     public static TestEntity fromDTOToEntity(TestDTO modelDTO) {
@@ -46,6 +48,28 @@ public class EntityMapper {
                 .updatingDate(test.getUpdatingDate())
                 .questions(test.getQuestions())
                 .tags(test.getTags())
+                .build();
+    }
+
+    public static TestResultDTO fromEntityToDTO(TestResultEntity entity) {
+        return TestResultDTO.builder()
+                .resultID(entity.getResultID())
+                .testID(entity.getTestID())
+                .userID(entity.getUserID())
+                .correctAnswersCount(entity.getCorrectAnswersCount())
+                .correctAnswersPercentage(entity.getCorrectAnswersPercentage())
+                .testingDate(entity.getTestingDate())
+                .build();
+    }
+
+    public static TestResultEntity fromDTOToEntity(TestResultDTO entityDTO) {
+        return TestResultEntity.builder()
+                .resultID(entityDTO.getResultID())
+                .testID(entityDTO.getTestID())
+                .userID(entityDTO.getUserID())
+                .correctAnswersCount(entityDTO.getCorrectAnswersCount())
+                .correctAnswersPercentage(entityDTO.getCorrectAnswersPercentage())
+                .testingDate(entityDTO.getTestingDate())
                 .build();
     }
 }

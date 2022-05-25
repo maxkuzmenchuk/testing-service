@@ -60,7 +60,7 @@ public class ArchiveService implements IArchiveService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void restoreFromArchive(Long testID) {
+    public void restoreFromArchive(Long testID, Long userID) {
         Optional<TestEntity> optionalTest = testRepository.findById(testID);
 
         if (optionalTest.isPresent()) {
@@ -71,7 +71,7 @@ public class ArchiveService implements IArchiveService {
 
             if (optionalArchive.isPresent()) {
                 ArchiveEntity archive = optionalArchive.get();
-                deleteFromArchive(archive.getTestID(), OperationType.RESTORE);
+                deleteFromArchive(archive.getTestID(), OperationType.RESTORE, userID);
 
                 testEntity.setArchived(false);
                 testEntity.setUpdatingDate(LocalDateTime.now());
@@ -89,7 +89,7 @@ public class ArchiveService implements IArchiveService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void deleteFromArchive(Long testID, OperationType reason) {
+    public void deleteFromArchive(Long testID, OperationType reason, Long userID) {
         archiveRepository.deleteByTestID(testID);
 
         switch (reason) {
@@ -100,8 +100,8 @@ public class ArchiveService implements IArchiveService {
                 Optional<TestEntity> optionalTest = testRepository.findById(testID);
 
                 if (optionalTest.isPresent()) {
-                    testService.deleteTestById(new Long[]{testID});
-                    updateLogService.logTestDelete(testID);
+                    testService.deleteTestById(testID, userID);
+                    updateLogService.logTestDelete(testID, 1L);
                 }
                 updateLogService.logArchiveDeleting(testID, 1L);
                 break;

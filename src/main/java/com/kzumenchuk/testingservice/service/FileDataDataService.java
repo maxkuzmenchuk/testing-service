@@ -7,9 +7,11 @@ import com.kzumenchuk.testingservice.exception.TestNotFoundException;
 import com.kzumenchuk.testingservice.repository.IFileDataRepository;
 import com.kzumenchuk.testingservice.repository.model.FileDataEntity;
 import com.kzumenchuk.testingservice.repository.model.dto.TestDTO;
+import com.kzumenchuk.testingservice.repository.model.dto.TestResultDTO;
 import com.kzumenchuk.testingservice.service.interfaces.IFileDataService;
 import com.kzumenchuk.testingservice.util.EntityMapper;
 import com.kzumenchuk.testingservice.util.FileDataUtil;
+import com.kzumenchuk.testingservice.util.PDFFonts;
 import com.kzumenchuk.testingservice.util.enums.FileKind;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -26,7 +28,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.Collections;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -54,25 +56,19 @@ public class FileDataDataService implements IFileDataService {
             document.addTitle(testDTO.getTitle());
             document.addCreationDate();
 
-            Font titleFont = new Font(Font.FontFamily.HELVETICA, 18, Font.BOLDITALIC, BaseColor.BLACK);
-            Font infoFont = new Font(Font.FontFamily.HELVETICA, 12, Font.NORMAL, BaseColor.BLACK);
-            Font textFont = new Font(Font.FontFamily.TIMES_ROMAN, 16, Font.NORMAL, BaseColor.BLACK);
-            Font questionDescriptionFont = new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL, BaseColor.BLACK);
-
-            Paragraph testTitle = new Paragraph(testDTO.getTitle(), titleFont);
+            Paragraph testTitle = new Paragraph(testDTO.getTitle(), PDFFonts.TITLE_FONT);
             testTitle.setAlignment(Element.ALIGN_CENTER);
-            testTitle.setFont(titleFont);
             document.add(testTitle);
 
-            Paragraph descriptionParagraph = new Paragraph("Description: ", infoFont);
+            Paragraph descriptionParagraph = new Paragraph("Description: ", PDFFonts.INFO_FONT);
             descriptionParagraph.add(testDTO.getDescription());
             document.add(descriptionParagraph);
 
-            Paragraph categoryParagraph = new Paragraph("Category: ", infoFont);
+            Paragraph categoryParagraph = new Paragraph("Category: ", PDFFonts.INFO_FONT);
             categoryParagraph.add(testDTO.getCategory());
             document.add(categoryParagraph);
 
-            Paragraph tagsParagraph = new Paragraph("Tags: ", infoFont);
+            Paragraph tagsParagraph = new Paragraph("Tags: ", PDFFonts.INFO_FONT);
             StringBuilder tagsSB = new StringBuilder();
             testDTO.getTags()
                     .forEach(tag -> {
@@ -87,8 +83,8 @@ public class FileDataDataService implements IFileDataService {
             AtomicInteger questionNum = new AtomicInteger(1);
             testDTO.getQuestions()
                     .forEach(questionEntity -> {
-                        Paragraph questionTitleParagraph = new Paragraph(questionNum + ". ", textFont);
-                        Paragraph questionDescription = new Paragraph(questionEntity.getDescription(), questionDescriptionFont);
+                        Paragraph questionTitleParagraph = new Paragraph(questionNum + ". ", PDFFonts.TEXT_FONT);
+                        Paragraph questionDescription = new Paragraph(questionEntity.getDescription(), PDFFonts.QUESTION_DESCRIPTION_FONT);
                         questionTitleParagraph.add(questionEntity.getTitle());
                         questionTitleParagraph.setSpacingBefore(15f);
 
@@ -100,7 +96,7 @@ public class FileDataDataService implements IFileDataService {
                             AtomicInteger optionNum = new AtomicInteger(1);
                             questionEntity.getOptions()
                                     .forEach(optionEntity -> {
-                                        Paragraph optionTitleParagraph = new Paragraph("        " + optionNum + ". ", textFont);
+                                        Paragraph optionTitleParagraph = new Paragraph("        " + optionNum + ". ", PDFFonts.TEXT_FONT);
                                         optionTitleParagraph.setExtraParagraphSpace(Element.ALIGN_RIGHT);
                                         optionTitleParagraph.add(optionEntity.getValue());
 
@@ -120,7 +116,75 @@ public class FileDataDataService implements IFileDataService {
 
             File newPdf = new File(sourceURLString);
             try {
-                return storeFileData(newPdf, id); // store file data to database
+                return storeFileData(newPdf, id, FileKind.TEST); // store file data to database
+            } catch (Exception exception) {
+                Files.delete(sourcePath);
+                throw new GeneratingPDFException("Exception while storing file data: " + exception.getMessage());
+            }
+        } catch (DocumentException | IOException | TestNotFoundException | EntityNotFoundException e) {
+            throw new GeneratingPDFException(e.getMessage());
+        }
+    }
+
+    @Override
+    public FileDataEntity generateTestResultToPDF(Long resultID) {
+        try {
+            Document document = new Document();
+            TestResultDTO testResultDTO = EntityMapper.fromEntityToDTO(fileDataUtil.getTestResult(resultID)); // get test entity
+            TestDTO testDTO = EntityMapper.fromEntityToDTO(fileDataUtil.getTest(testResultDTO.getTestID())); // get test entity
+
+            Path sourceURL = fileDataUtil.returnSourceUrl(FileKind.RESULT);
+            String sourceURLString = sourceURL + "/" + resultID + "_" + testDTO.getTitle() + "_result.pdf";
+
+            Path sourcePath = Paths.get(sourceURLString);
+            PdfWriter.getInstance(document, Files.newOutputStream(sourcePath));
+
+            // generating document
+            document.open();
+            document.addTitle(testDTO.getTitle() + " results");
+            document.addCreationDate();
+
+            Paragraph testTitle = new Paragraph(testDTO.getTitle() + " results", PDFFonts.TITLE_FONT);
+            testTitle.setAlignment(Element.ALIGN_CENTER);
+            document.add(testTitle);
+
+            Paragraph descriptionParagraph = new Paragraph("Description: ", PDFFonts.INFO_FONT);
+            descriptionParagraph.add(testDTO.getDescription());
+            document.add(descriptionParagraph);
+
+            Paragraph categoryParagraph = new Paragraph("Category: ", PDFFonts.INFO_FONT);
+            categoryParagraph.add(testDTO.getCategory());
+            document.add(categoryParagraph);
+
+            Paragraph tagsParagraph = new Paragraph("Tags: ", PDFFonts.INFO_FONT);
+            StringBuilder tagsSB = new StringBuilder();
+            testDTO.getTags()
+                    .forEach(tag -> {
+                        tagsSB.append(tag.getValue()).append(", "); // create string of tags from collection
+                    });
+            tagsSB.deleteCharAt(tagsSB.lastIndexOf(","));
+            Chunk tagsValueChunk = new Chunk(tagsSB.toString());
+            tagsParagraph.add(tagsValueChunk);
+            document.add(tagsParagraph);
+
+            // add results to file
+            String correctAnswersCount = "Correct answers: " + testResultDTO.getCorrectAnswersCount() + "/" + testDTO.getQuestions().size();
+            Paragraph correctAnswersCountParagraph = new Paragraph(correctAnswersCount, PDFFonts.INFO_FONT);
+            document.add(correctAnswersCountParagraph);
+
+            Paragraph correctAnswersPercentageParagraph = new Paragraph("Correct answer percentage: " + testResultDTO.getCorrectAnswersPercentage() + "%", PDFFonts.INFO_FONT);
+            document.add(correctAnswersPercentageParagraph);
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+
+            Paragraph testingDateParagraph = new Paragraph("Testing date: " + testResultDTO.getTestingDate().format(formatter), PDFFonts.INFO_FONT);
+            document.add(testingDateParagraph);
+
+            document.close();
+
+            File newPdf = new File(sourceURLString);
+            try {
+                return storeFileData(newPdf, testResultDTO.getTestID(), FileKind.RESULT); // store file data to database
             } catch (Exception exception) {
                 Files.delete(sourcePath);
                 throw new GeneratingPDFException("Exception while storing file data: " + exception.getMessage());
@@ -132,10 +196,11 @@ public class FileDataDataService implements IFileDataService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public FileDataEntity storeFileData(File file, Long testID) {
+    public FileDataEntity storeFileData(File file, Long testID, FileKind fileKind) {
         String fileType = file.getPath().split("\\.")[1]; // get file extension
         FileDataEntity fileDataEntity = FileDataEntity.builder()
                 .testID(testID)
+                .fileKind(fileKind)
                 .fileName(file.getName())
                 .fileType(fileType)
                 .fileSourceUrl(file.getPath())
@@ -145,20 +210,40 @@ public class FileDataDataService implements IFileDataService {
     }
 
     @Override
-    public FileDataEntity getFileByTestID(Long testID) throws FileNotFoundException {
-        Optional<FileDataEntity> optionalFile = fileDataRepository.getFileDataEntityByTestID(testID);
+    public FileDataEntity getTestFile(Long testID, FileKind fileKind) throws FileNotFoundException {
+        Optional<FileDataEntity> optionalFile = fileDataRepository.getTestFile(testID, fileKind);
+
         if (optionalFile.isPresent()) {
             File file = new File(optionalFile.get().getFileSourceUrl());
 
             if (!file.exists()) {
                 // delete all file data from database if file not exists
-                fileDataRepository.deleteAllById(Collections.singleton(optionalFile.get().getFileID()));
+                deleteTestFileData(optionalFile.get().getTestID(), FileKind.TEST);
                 return generateTestDataToPDF(testID);
             }
 
             return optionalFile.get();
         } else {
             return generateTestDataToPDF(testID);
+        }
+    }
+
+    @Override
+    public FileDataEntity getTestResultFile(Long resultID) throws FileNotFoundException {
+        Optional<FileDataEntity> optionalFile = fileDataRepository.findById(resultID);
+
+        if (optionalFile.isPresent()) {
+            File file = new File(optionalFile.get().getFileSourceUrl());
+
+            if (!file.exists()) {
+                // delete all file data from database if file not exists
+                deleteTestResultFileData(resultID);
+                return generateTestResultToPDF(resultID);
+            }
+
+            return optionalFile.get();
+        } else {
+            return generateTestResultToPDF(resultID);
         }
     }
 
@@ -179,17 +264,23 @@ public class FileDataDataService implements IFileDataService {
     }
 
     @Override
-    public void updateFileData(Long testID) {
-        Optional<FileDataEntity> optionalFileData = fileDataRepository.getFileDataEntityByTestID(testID);
+    public void updateTestFileData(Long testID) {
+        Optional<FileDataEntity> optionalFileData = fileDataRepository.getTestFile(testID, FileKind.TEST);
 
         if (optionalFileData.isPresent()) {
             generateTestDataToPDF(testID);
+
         }
     }
 
     @Override
-    public void deleteFileData(Long testID) {
-        fileDataRepository.deleteAllByTestID(testID);
+    public void deleteTestFileData(Long testID, FileKind fileKind) {
+        fileDataRepository.deleteTestFile(testID, fileKind);
+    }
+
+    @Override
+    public void deleteTestResultFileData(Long resultID) {
+        fileDataRepository.deleteById(resultID);
     }
 }
 

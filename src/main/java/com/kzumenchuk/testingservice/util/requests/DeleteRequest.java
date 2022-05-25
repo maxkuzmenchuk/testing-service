@@ -5,6 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class DeleteTestRequest {
+public class DeleteRequest {
+    private Long userID;
     private Long[] deleteIDs;
 }

@@ -55,9 +55,9 @@ public class UpdateLogService implements IUpdateLogService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void logTestDelete(Long testID) {
+    public void logTestDelete(Long testID, Long userID) {
         UpdateLogEntity deletedTestLog = UpdateLogUtil.createLogEntity(testID, EntityType.TEST,
-                OperationType.DELETE, "", "", "", 1L);
+                OperationType.DELETE, "", "", "", userID);
         saveLog(deletedTestLog);
     }
 
@@ -123,6 +123,13 @@ public class UpdateLogService implements IUpdateLogService {
     public void logTagsUpdate(Long updateUserID, TagEntity editedTag, TagEntity tag) {
         UpdateLogEntity logEntity = UpdateLogUtil.createLogEntity(tag.getTagID(), EntityType.TAG,
                 OperationType.UPDATE, "value", tag.getValue(), editedTag.getValue(), updateUserID);
+        saveLog(logEntity);
+    }
+
+    @Override
+    public void logResultDelete(Long resultID, Long userID) {
+        UpdateLogEntity logEntity = UpdateLogUtil.createLogEntity(resultID, EntityType.RESULT,
+                OperationType.DELETE, "", "", "", userID);
         saveLog(logEntity);
     }
 

@@ -10,6 +10,8 @@ import com.kzumenchuk.testingservice.repository.model.TestEntity;
 import com.kzumenchuk.testingservice.repository.model.dto.TestDTO;
 import com.kzumenchuk.testingservice.service.interfaces.*;
 import com.kzumenchuk.testingservice.util.EntityMapper;
+import com.kzumenchuk.testingservice.util.enums.FileKind;
+import com.kzumenchuk.testingservice.util.requests.DeleteRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -120,7 +122,7 @@ public class TestService implements ITestService {
                 updateLogService.logTestUpdate(tempTest, EntityMapper.fromEntityToDTO(updatedTest), 1L);
 
                 // update file data if exists
-                fileDataService.updateFileData(updatedTest.getTestID());
+                fileDataService.updateTestFileData(updatedTest.getTestID());
 
                 hmResult.put("message", "Test updated successfully");
                 hmResult.put("result", EntityMapper.fromEntityToDTO(updatedTest));
@@ -139,15 +141,26 @@ public class TestService implements ITestService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void deleteTestById(Long[] IDs) {
+    public void deleteTestById(DeleteRequest deleteRequest) {
+        Long userID = deleteRequest.getUserID();
+        Long[] IDs = deleteRequest.getDeleteIDs();
         Stream.of(IDs)
                 .filter(Objects::nonNull)
                 .forEach((id) -> {
                     testRepository.deleteById(id);
-                    fileDataService.deleteFileData(id);
+                    fileDataService.deleteTestFileData(id, FileKind.TEST);
 
-                    updateLogService.logTestDelete(id);
+                    updateLogService.logTestDelete(id, userID);
                 });
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteTestById(Long id, Long userID) {
+        testRepository.deleteById(id);
+        fileDataService.deleteTestFileData(id, FileKind.TEST);
+
+        updateLogService.logTestDelete(id, userID);
     }
 
     @Override

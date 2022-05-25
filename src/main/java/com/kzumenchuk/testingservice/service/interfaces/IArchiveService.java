@@ -9,9 +9,9 @@ import java.util.List;
 public interface IArchiveService {
     void moveToArchive(Long testID);
 
-    void restoreFromArchive(Long testID);
+    void restoreFromArchive(Long testID, Long userID);
 
-    void deleteFromArchive(Long archiveID, OperationType reason);
+    void deleteFromArchive(Long testID, OperationType reason, Long userID);
 
     ArchiveEntity getArchiveById(Long id);
 

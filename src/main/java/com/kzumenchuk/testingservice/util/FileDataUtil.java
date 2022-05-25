@@ -1,7 +1,9 @@
 package com.kzumenchuk.testingservice.util;
 
 import com.kzumenchuk.testingservice.repository.ITestRepository;
+import com.kzumenchuk.testingservice.repository.ITestResultRepository;
 import com.kzumenchuk.testingservice.repository.model.TestEntity;
+import com.kzumenchuk.testingservice.repository.model.TestResultEntity;
 import com.kzumenchuk.testingservice.util.enums.FileKind;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,8 @@ public class FileDataUtil {
     private final String TEST_RESULT_FILE_SOURCE_URL = "files/results/";
 
     private final ITestRepository testRepository;
+
+    private final ITestResultRepository testResultRepository;
 
     public Path returnSourceUrl(FileKind fileKind) {
         try {
@@ -54,5 +58,9 @@ public class FileDataUtil {
 
     public TestEntity getTest(Long testID) {
         return testRepository.getById(testID);
+    }
+
+    public TestResultEntity getTestResult(Long resultID) {
+        return testResultRepository.getById(resultID);
     }
 }

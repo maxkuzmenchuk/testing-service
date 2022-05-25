@@ -119,11 +119,12 @@ create table files
     file_id         serial
         constraint files_pk
             primary key,
-    test_id         int       not null,
-    file_name       varchar   not null,
-    file_type       varchar   not null,
-    file_source_url varchar   not null,
-    creating_date   timestamp not null
+    file_kind       varchar(6) not null,
+    test_id         int        not null,
+    file_name       varchar    not null,
+    file_type       varchar    not null,
+    file_source_url varchar    not null,
+    creating_date   timestamp  not null
 );
 
 create unique index files_file_id_uindex
