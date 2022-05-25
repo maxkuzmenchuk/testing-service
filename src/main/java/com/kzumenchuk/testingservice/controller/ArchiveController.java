@@ -2,7 +2,7 @@ package com.kzumenchuk.testingservice.controller;
 
 import com.kzumenchuk.testingservice.service.ArchiveService;
 import com.kzumenchuk.testingservice.util.CustomResponse;
-import com.kzumenchuk.testingservice.util.OperationType;
+import com.kzumenchuk.testingservice.util.enums.OperationType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

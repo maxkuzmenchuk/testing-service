@@ -2,7 +2,7 @@ package com.kzumenchuk.testingservice.service.interfaces;
 
 
 import com.kzumenchuk.testingservice.repository.model.ArchiveEntity;
-import com.kzumenchuk.testingservice.util.OperationType;
+import com.kzumenchuk.testingservice.util.enums.OperationType;
 
 import java.util.List;
 

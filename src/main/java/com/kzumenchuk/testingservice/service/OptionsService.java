@@ -5,6 +5,7 @@ import com.kzumenchuk.testingservice.repository.IOptionsRepository;
 import com.kzumenchuk.testingservice.repository.model.OptionEntity;
 import com.kzumenchuk.testingservice.repository.model.QuestionEntity;
 import com.kzumenchuk.testingservice.service.interfaces.IOptionsService;
+import com.kzumenchuk.testingservice.service.interfaces.IUpdateLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +20,7 @@ import java.util.Set;
 public class OptionsService implements IOptionsService {
     private final IOptionsRepository IOptionsRepository;
 
-    private final UpdateLogService updateLogService;
+    private final IUpdateLogService updateLogService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override

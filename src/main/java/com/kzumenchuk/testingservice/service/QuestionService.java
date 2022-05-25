@@ -3,7 +3,9 @@ package com.kzumenchuk.testingservice.service;
 import com.kzumenchuk.testingservice.exception.QuestionNotFoundException;
 import com.kzumenchuk.testingservice.repository.IQuestionRepository;
 import com.kzumenchuk.testingservice.repository.model.QuestionEntity;
+import com.kzumenchuk.testingservice.service.interfaces.IOptionsService;
 import com.kzumenchuk.testingservice.service.interfaces.IQuestionService;
+import com.kzumenchuk.testingservice.service.interfaces.IUpdateLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,8 +19,8 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class QuestionService implements IQuestionService {
     private final IQuestionRepository IQuestionRepository;
-    private final OptionsService optionsService;
-    private final UpdateLogService updateLogService;
+    private final IOptionsService optionsService;
+    private final IUpdateLogService updateLogService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override

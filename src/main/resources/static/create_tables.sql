@@ -114,6 +114,23 @@ create table test_archive
 create unique index test_archive_archive_id_uindex
     on test_archive (archive_id);
 
+create table files
+(
+    file_id         serial
+        constraint files_pk
+            primary key,
+    test_id         int       not null,
+    file_name       varchar   not null,
+    file_type       varchar   not null,
+    file_source_url varchar   not null,
+    creating_date   timestamp not null
+);
+
+create unique index files_file_id_uindex
+    on files (file_id);
+
+
+
 
 
 

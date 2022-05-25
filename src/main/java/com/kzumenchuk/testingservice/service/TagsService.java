@@ -4,6 +4,7 @@ import com.kzumenchuk.testingservice.exception.TagNotFoundException;
 import com.kzumenchuk.testingservice.repository.ITagsRepository;
 import com.kzumenchuk.testingservice.repository.model.TagEntity;
 import com.kzumenchuk.testingservice.service.interfaces.ITagsService;
+import com.kzumenchuk.testingservice.service.interfaces.IUpdateLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,7 +18,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class TagsService implements ITagsService {
     private final ITagsRepository ITagsRepository;
-    private final UpdateLogService updateLogService;
+    private final IUpdateLogService updateLogService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override

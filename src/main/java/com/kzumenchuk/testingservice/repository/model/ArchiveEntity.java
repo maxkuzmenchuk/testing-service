@@ -2,9 +2,11 @@ package com.kzumenchuk.testingservice.repository.model;
 
 
 import lombok.*;
+import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Entity
 @AllArgsConstructor
@@ -27,4 +29,17 @@ public class ArchiveEntity {
 
     @Column(name = "archiving_test_id")
     private Long testID;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        ArchiveEntity archive = (ArchiveEntity) o;
+        return archiveID != null && Objects.equals(archiveID, archive.archiveID);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

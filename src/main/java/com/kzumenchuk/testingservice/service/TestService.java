@@ -8,7 +8,7 @@ import com.kzumenchuk.testingservice.repository.model.QuestionEntity;
 import com.kzumenchuk.testingservice.repository.model.TagEntity;
 import com.kzumenchuk.testingservice.repository.model.TestEntity;
 import com.kzumenchuk.testingservice.repository.model.dto.TestDTO;
-import com.kzumenchuk.testingservice.service.interfaces.ITestService;
+import com.kzumenchuk.testingservice.service.interfaces.*;
 import com.kzumenchuk.testingservice.util.EntityMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,9 +24,10 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class TestService implements ITestService {
     private final ITestRepository testRepository;
-    private final QuestionService questionService;
-    private final TagsService tagsService;
-    private final UpdateLogService updateLogService;
+    private final IQuestionService questionService;
+    private final ITagsService tagsService;
+    private final IUpdateLogService updateLogService;
+    private final IFileDataService fileDataService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -118,6 +119,9 @@ public class TestService implements ITestService {
 
                 updateLogService.logTestUpdate(tempTest, EntityMapper.fromEntityToDTO(updatedTest), 1L);
 
+                // update file data if exists
+                fileDataService.updateFileData(updatedTest.getTestID());
+
                 hmResult.put("message", "Test updated successfully");
                 hmResult.put("result", EntityMapper.fromEntityToDTO(updatedTest));
 
@@ -140,6 +144,7 @@ public class TestService implements ITestService {
                 .filter(Objects::nonNull)
                 .forEach((id) -> {
                     testRepository.deleteById(id);
+                    fileDataService.deleteFileData(id);
 
                     updateLogService.logTestDelete(id);
                 });

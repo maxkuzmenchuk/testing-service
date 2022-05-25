@@ -1,6 +1,8 @@
 package com.kzumenchuk.testingservice.util;
 
 import com.kzumenchuk.testingservice.repository.model.UpdateLogEntity;
+import com.kzumenchuk.testingservice.util.enums.EntityType;
+import com.kzumenchuk.testingservice.util.enums.OperationType;
 
 import java.time.LocalDateTime;
 

@@ -9,7 +9,7 @@ import com.kzumenchuk.testingservice.repository.model.TestEntity;
 import com.kzumenchuk.testingservice.service.interfaces.IArchiveService;
 import com.kzumenchuk.testingservice.service.interfaces.IUpdateLogService;
 import com.kzumenchuk.testingservice.util.EntityMapper;
-import com.kzumenchuk.testingservice.util.OperationType;
+import com.kzumenchuk.testingservice.util.enums.OperationType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,7 +1,7 @@
 package com.kzumenchuk.testingservice.repository.model;
 
-import com.kzumenchuk.testingservice.util.EntityType;
-import com.kzumenchuk.testingservice.util.OperationType;
+import com.kzumenchuk.testingservice.util.enums.EntityType;
+import com.kzumenchuk.testingservice.util.enums.OperationType;
 import lombok.*;
 
 import javax.persistence.*;
